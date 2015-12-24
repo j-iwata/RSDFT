@@ -1,0 +1,45 @@
+# RSDFT
+XCtype 'LDAPZ81'                  / XCtype
+AX  20.000                        / ax
+A1  1.00  0.00  0.00              / aa(1:3,1)
+A2  0.00  1.00  0.00              / aa(1:3,2)
+A3  0.00  0.00  1.00              / aa(1:3,3)
+Nband 12                          / Nband
+Nspin  1                          / Nspin
+Nexte  0.d0                       / Next_electron
+NK  2                             / nk
+MMM1  2  2  2                     / mmm(1:3,2)
+MMM2  2  2  2                     / mmm(1:3,2)
+NCG   3                           / Ncg
+NGRID 40 40 40                    / Ngrid(1:3)
+SYSTYPE 3
+Md  6                             / Md
+PSELECT 2                         / pselaect
+PP 2 'H_psv.dat'                 / file_ps(1)
+imix 10                           / imix
+mmix  4                           / mmix
+beta  1.0                         / beta
+scfconv 1.d-15                    / scf_conv
+PROCS  1 1 1 1 1 1                / np_2d(1:6)
+ekbt 1.d-6                        / ekbt
+kinteg 5                          / kinteg
+Diter 100                         / Diter
+Nsweep  5                         / Nsweep
+IC  0                             / IC
+OC  3                             / OC
+OC2 100                           / OC2
+IOCTRL 0                          / IO_ctrl
+SWSCF 1                           / iswitch_scf
+SWOPT  1                          / iswitch_opt
+SWBAND  0                         / iswitch_band
+ETLIMIT  1.d10                    / etime_limit
+ATOMOPT1  100  6  5                        / ncycl, most, nrfr
+ATOMOPT2  0.5d0  1.d-10  1.d-4  1.d-1    / okatom, eeps, feps, decr
+ATOMOPT3  100                            / diter_opt
+
+RESM 8.0 11.0
+NCELL 1 1 10
+VCONST 0.0
+KMESM 20 10
+SWBC 1
+

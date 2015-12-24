@@ -1,0 +1,7 @@
+Do the following procedure:
+
+1) Compile utility/band2gp.f90
+2) Execute band2gp
+3) Start GNUPLOT
+4) gnuplot> load 'plot_band'
+

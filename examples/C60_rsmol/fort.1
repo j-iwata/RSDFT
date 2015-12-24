@@ -1,0 +1,19 @@
+# RSDFT
+SYStype 1                         / SYStype ( 0:RSSOL, 1:RSMOL )
+XCtype 'LDAPZ81'                  / Exchange-Correlation functional
+PP 2 'C_psv.dat'                  / format and name of pseudopotential
+scfconv 1.d-20                    / scf-convergence criterion
+PROCS  2 2 4 1 1 1                / process partioning
+Diter 100                         / Diter ( Max. # of iteration for SCF )
+Nsweep  20                        / Nsweep ( Max # of iteration for Sweep )
+IC  0                             / Input Control
+OC  0                             / Output Control
+ETLIMIT  1.d10                    / etime_limit
+INFOLEVEL  1                      / info_level
+SWSCF  1                          / scf
+
+SWOPT  0                          / opt
+ATOMOPT1  0  6  5                        / ncycl, most, nrfr
+ATOMOPT2  0.5d0  1.d-10  1.d-8  1.d-1    / okatom, eeps, feps, decr
+ATOMOPT3  100
+

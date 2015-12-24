@@ -1,0 +1,22 @@
+5      ! nstep  (maximum step)
+0.1d0  ! deltat (time difference in a.u.)
+3.0d2  ! temp   (Temperature in K)
+20.0d1 ! omegan (Bath frequency in cm^-1)
+5.0d2  ! emass  (Fictitious electron mass in a.u.)
+50.0d0 ! trange
+0.020  0.040  -0.00000000005   ! ekinw, ekin1(upper bound), ekin2(lower bound)
+1000.0  0.004 ! wnose0, ekinw
+.t.    ! lcpmd  (.t. for CPMD and .f. for BOMD)
+.f.    ! lbath  (.t. for NVT and .f. for NVE)
+.t.    ! inivel (.f. for restart)
+.f.    ! lmeta  (.t. for Metadynamics :: under construction)
+.f.    ! lbere
+.f.    ! lbathnew
+.f.    ! lscale
+.f.    ! lscaleele
+.f.    ! lquench
+.f.    ! lforce_fast
+.f.    ! lbathnewe
+.f.    ! linitnose
+.f.    ! linitnosee
+

@@ -1,0 +1,93 @@
+########################################################################
+########################################################################
+# Please edit following macros suitable for your computer
+#   CPP_FLAGS    ( -Dxxxx, see RSDFT Users Guide )
+#   INCLUDE_DIR  ( Directory of modules and include files )
+#   FFTW_L       ( link to FFTW )
+#   Eigen_L      ( link to Eigen )
+#   LAPACK_L     ( link to BLAS and LAPACK/ScaLAPACK ) 
+#   FFLAGS0      ( preprocessor and compile options )
+#   LFLAGS0      ( link options )
+#   OMPFLAG      ( OpenMP options )
+########################################################################
+###################################### Default ( do not edit ) #########
+INCLUDE_DIR = -I../
+CPP_FLAGS =
+LFLAGS0   =
+OMPFLAG   =
+########################################################################
+####### With the following options, an expedient code may be generated #
+########################################################################
+#FC = mpif90
+#FFLAGS0   = -cpp
+#LAPACK_L  = -llapack -lblas
+#CPP_FLAGS = -D_LAPACK_
+########################################################################
+####### If you try to generate the code suitable for your systems,   ###
+####### edit followings adequately                                   ###
+########################################################################
+########################### preprocessor options, links and includes ###
+########################################################################
+####################### Generate REAL8 code ( RSMOL is supported ) #####
+#CPP_FLAGS := -D_DRSDFT_ $(CPP_FLAGS)
+######################### LAPACK is used ( ScaLAPACK is not used ) #####
+#CPP_FLAGS := -D_LAPACK_ $(CPP_FLAGS)
+##################################################### FFTE is used #####
+#CPP_FLAGS := -D_FFTE_ $(CPP_FLAGS)
+##################################################### FFTW is used #####
+#CPP_FLAGS := -D_FFTW_ $(CPP_FLAGS)
+#INCLUDE_DIR := -I/home/iwata/fftw-3.3.4/include/ $(INCLUDE_DIR)
+#FFTW_L = -L/home/iwata/fftw-3.3.4/lib/ -lfftw3_mpi -lfftw3 -lm
+########################################################################
+################################################# compiler & options ###
+########################################################################
+##### INTEL                                                        #####
+#FC = mpif90
+#FFLAGS0 = -cpp
+#FFLAGS0 = -cpp -fast -xHost
+#FFLAGS0 = -cpp -C
+#OMPFLAG = -openmp
+#LAPACK_L = -lmkl_scalapack_lp64 -lmkl_blacs_openmpi_lp64 \
+           -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core \
+           -lguide -lpthread
+#LAPACK_L = -lmkl_scalapack_lp64 -lmkl_blacs_openmpi_lp64 \
+           -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core \
+           -lpthread
+#LAPACK_L = -lmkl_scalapack_lp64 -lmkl_blacs_openmpi_lp64 \
+           -lmkl_intel_lp64 -lmkl_sequential -lmkl_core
+#LAPACK_L = -lm /Users/lhan/.homebrew/opt/scalapack/lib/libscalapack.dylib -lblas
+########################################################################
+##### PGF                                                          #####
+#FFLAGS0 = -Mpreprocess -O3
+#FFLAGS0 = -Mpreprocess -fastsse
+#FFLAGS0 = -Mpreprocess -C
+#FFLAGS0 = -Mpreprocess -C -Mchkfpstk -Mchkptr -Mchkstk -Minform=inform
+#OMPFLAG = -mp
+#FFLAGS0 = -fastsse -O3 -tp amd64 -mp -Mpreprocess
+#FFLAGS0 = -fastsse -O3 -tp amd64e -mp -Mpreprocess
+#FFLAGS0 = -fastsse -O3 -tp barcelona-64 -mp -Mpreprocess
+#FFLAGS0 = -fastsse -O3 -tp shanghai-64 -mp -Mpreprocess
+########################################################################
+#####  K computer                                                  #####
+#FC = mpifrtpx
+#FFLAGS0 = -Kvisimpact,preex,array_private,auto,ocl,NOFLTLD \
+        -Ksimd=2 -Kopenmp -Ktemparraystack -Koptmsg=2 \
+        -X9 -V -Ec -Qa,d,i,p,t,x -Cpp -Ccpp
+#LFLAGS0 = ${FFLAGS0} -Ntl_trt
+#LAPACK_L = -SSL2BLAMP -SCALAPACK
+########################################################################
+########################################################################
+########################################################################
+############################ Do not edit below #########################
+########################################################################
+#
+FFLAGS = $(FFLAGS0) $(OMPFLAG) $(CPP_FLAGS) $(INCLUDE_DIR)
+LFLAGS = $(LFLAGS0) $(OMPFLAG)
+#
+########################################################################
+.SUFFIXES:
+.SUFFIXES: .o .f .f90
+.f.o :
+	$(FC) $(FFLAGS) -c $< -o $@
+.f90.o :
+	$(FC) $(FFLAGS) -c $< -o $@

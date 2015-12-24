@@ -1,0 +1,4 @@
+1) Run utility/ufld2gp
+2) gnuplot
+3) load 'utility/plot_ufld'
+

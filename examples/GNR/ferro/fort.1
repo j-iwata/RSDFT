@@ -1,0 +1,37 @@
+# RSDFT
+XCtype 'LDAPZ81'
+Nspin   2 
+Ndspin -1.0
+Nfixed  50 
+NK  32                            / nk
+MMM1  32  17 32                   / mmm(1:3,2)
+MMM2  32  2  32                   / mmm(1:3,2)
+NGRID 312 12 72                   / Ngrid(1:3)
+PP 2 'C_psv.dat'                  / ippform(1) file_ps(1)
+PP 2 'H_psv.dat'                  / ippform(1) file_ps(1)
+scfconv 1.d-15                    / scf_conv
+PROCS  4 1 1 1 8 1                / np_2d(1:6)
+Diter  300                        / Diter
+Nsweep  10                        / Nsweep
+IC   0                            / IC
+OC   2                            / OC
+SWSCF   1                         / scf
+SWOPT   0                         / opt
+SWBAND  0                         / band
+ETLIMIT  1.d10                    / etime_limit
+ATOMOPT1  0  6  5                        / ncycl, most, nrfr
+ATOMOPT2  0.5d0  1.d-10  1.d-8  1.d-1    / okatom, eeps, feps, decr
+ATOMOPT3  100
+
+BAND 1 120 100 1.d-7 200
+0.0 0.0 0.5
+0.0 0.5 0.0
+0.0 0.0 0.0
+50 50
+
+# SSEIG
+  3 0 0       / L_fixed orth_impl, unroll_step
+  1           / n_ccurve
+  0.3d0 0.6d0  / left right
+  0           / SS_IO
+

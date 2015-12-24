@@ -1,0 +1,68 @@
+# RSDFT
+XCtype 'LDAPZ81'
+AX  111.76
+A1  1.00  0.00  0.00
+A2  0.00  1.00  0.00
+A3  0.00  0.00  1.00
+Nband 23552
+Nspin  1
+Nexte  0.d0
+NK  2                             / nk
+MMM1  2  2  2                     / mmm(1:3,2)
+MMM2  2  2  2                     / mmm(1:3,2)
+NPBZ 1 /
+NCG   2                           / Ncg
+SWGS  0                           / iswitch_gs
+NGRID 176 176 176                    / Ngrid(1:3)
+Md  6                             / Md
+PP 2 'Si_psv.dat'                 / ippform(1) file_ps(1)
+PP 2 'P_psv2.4d.dat'              / ippform(1) file_ps(1)
+imix 11                           / imix
+mmix  4                           / mmix
+beta  1.0                         / beta
+scfconv 1.d-15                    / scf_conv
+PSELECT 2                         / pselaect
+NL1  1  0                         / Ndense, Nintp
+NL2  1.5d0  1.d0  8.d0            / rcfac, qcfac, etafac
+PROCS  8 8 8 1 1 1               / np_2d(1:6)
+PROCS0  16 16 16 1 1 1               / np_2d(1:6)
+MBD  0                            / MB_d
+NBLK 0                            / NBLK  (gram_schmidt_t)
+NBLK1  0                          / NBLK1 (gram_schmidt_t)
+mloop  3                          / mloop (cgpc)
+ekbt 1.d-4                        / ekbt
+kinteg 10                         / kinteg
+Diter 300                         / Diter
+Nsweep 20                         / Nsweep
+IC  3                             / IC
+OC  0                             / OC
+OC2  100                          / OC2
+IOCTRL 3                          / IO_ctrl
+SWSCF 1                           / scf
+SWOPT  0                          / opt
+SWBAND  2                         / band
+ETLIMIT  80000.d0                 / etime_limit
+ATOMOPT1  0  6  5                        / ncycl, most, nrfr
+ATOMOPT2  0.5d0  1.d-10  1.d-8  1.d-1    / okatom, eeps, feps, decr
+ATOMOPT3  100
+SCL  0 0                          / NPROW NPCOL
+
+ZATOM 14 15 /
+LSTWF 22200 22220 /
+
+
+BAND 5 23552 23000 1.d-7 100
+0.5 0.5 0.0 0.5 0.5 0.0
+0.5 0.5 0.0 0.0 0.5 0.0
+0.0 0.5 0.0 0.0 0.0 0.0
+10 10 10 10 10
+
+
+# SSEIG
+  6 0 0       / L_fixed orth_impl, unroll_step
+  2           / n_ccurve
+  0.225d0 0.230d0  / left right
+  0.230d0 0.250d0
+  0           / SS_IO
+  32 10 1                 / opt_N out_iter_max out_iter_init
+  1.d-8 1.d-8 1.d-8 1.d-8 / tol_iter(1:4)

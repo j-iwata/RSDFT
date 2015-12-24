@@ -1,0 +1,10 @@
+unset surface
+set pm3d at b
+set view map
+
+splot 'fort.10'
+
+pause -1
+
+splot 'fort.11'
+

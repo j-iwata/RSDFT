@@ -1,0 +1,7 @@
+2       / natom
+4       / mbv
+0.1     / gamma
+2000    / ne
+0.0 0.0 / e1 e2
+0       / [ 0:Gaussian, 1:Loretzian ]
+

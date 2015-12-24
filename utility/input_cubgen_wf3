@@ -1,0 +1,10 @@
+R  0                 / flag_real8  iflag_abs
+'wf.dat1'            / file_name
+1                    / MBZ
+1                    / MSP
+4                    / ndata
+1  1  1              / n1 k1 s1 (band,k,spin)
+2  1  1              / n2 k2 s2 (band,k,spin)
+4  1  1              / n3 k3 s3 (band,k,spin)
+5  1  1              / n4 k4 s4 (band,k,spin)
+PROCS  1 1 1  1 1 1  / node_partition(1:6)
