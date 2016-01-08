@@ -189,7 +189,7 @@ CONTAINS
 !
 
     if ( OC ==  2 .or. OC ==  3 .or. OC ==  5 .or. &
-         OC == 12 .or. OC == 13 .or. OC == 15 ) then
+         OC == 12 .or. OC == 13 ) then
 
        allocate( rtmp(ML) )
 
@@ -309,7 +309,7 @@ CONTAINS
     
 
     if ( OC ==  1 .or. OC ==  3 .or. OC ==  4 .or. OC ==  5 .or. &
-         OC == 11 .or. OC == 13 .or. OC == 14 .or. OC == 15 ) then
+         OC == 11 .or. OC == 13 ) then
 
        call simple_wf_io_write &
             ( file_wf1, IO_ctrl, OC, SYStype, MBwr1, MBwr2, disp_switch )
@@ -403,7 +403,7 @@ CONTAINS
 !
 ! --- Read VRHO ---
 !
-    if ( IC==2 .or. IC==3 .or. IC==5 .or. IC==6 .or. IC==13 ) then
+    if ( IC==2 .or. IC==3 .or. IC==13 ) then
 
        if ( myrank==0 ) then
           open(80,file=file_vrho2,form='unformatted')

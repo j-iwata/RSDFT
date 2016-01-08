@@ -1,0 +1,4 @@
+RSDFT ( ver.1.0.1 )
+  FFTE ( http://www.ffte.jp/ ) has been included.
+  Bug fix: I/O for hybrid-XC
+

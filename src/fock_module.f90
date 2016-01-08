@@ -212,24 +212,24 @@ CONTAINS
     occ_hf(:,:,:)   = 0.0d0
     unk_hf(:,:,:,:) = zero
 
-#ifdef _DRSDFT_
-    do s=MSP_0,MSP_1
-    do k=MBZ_0,MBZ_1
-       if ( k < FKBZ_0 .or. FKBZ_1 < k ) cycle
-       i_orb=0
-       i_occ=0
-       do n=1,MB
-          if ( abs(occ(n,k,s)) <= 1.d-10 ) cycle
-          i_occ = i_occ + 1
-          if ( mod(i_occ-1,np_fkmb) == myrank_f ) then 
-             i_orb = i_orb + 1
-             if ( MB_0 <= n .and. n <= MB_1 ) unk_hf(:,i_orb,k,s) = unk(:,n,k,s)
-             occ_hf(i_orb,k,s) = occ(n,k,s)
-          end if
-       end do ! n
-    end do ! k
-    end do ! s
-#else
+!#ifdef _DRSDFT_
+!    do s=MSP_0,MSP_1
+!    do k=MBZ_0,MBZ_1
+!       if ( k < FKBZ_0 .or. FKBZ_1 < k ) cycle
+!       i_orb=0
+!       i_occ=0
+!       do n=1,MB
+!          if ( abs(occ(n,k,s)) <= 1.d-10 ) cycle
+!          i_occ = i_occ + 1
+!          if ( mod(i_occ-1,np_fkmb) == myrank_f ) then 
+!             i_orb = i_orb + 1
+!             if ( MB_0 <= n .and. n <= MB_1 ) unk_hf(:,i_orb,k,s) = unk(:,n,k,s)
+!             occ_hf(i_orb,k,s) = occ(n,k,s)
+!          end if
+!       end do ! n
+!    end do ! k
+!    end do ! s
+!#else
     do s=MSP_0,MSP_1
     do k=MBZ_0,MBZ_1
     do n=MB_0,MB_1
@@ -238,7 +238,7 @@ CONTAINS
     end do ! n
     end do ! k
     end do ! s
-#endif
+!#endif
 
     m = size(unk_hf,1)*size(unk_hf,2)
     do s=MSP_0,MSP_1

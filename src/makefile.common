@@ -116,7 +116,6 @@ MODS1 = \
        io_write_module.o\
        ps_nloc3_module.o\
        inner_product_module.o\
-       xc_hybrid_io_module.o\
        cgpc_hprsdft_module.o\
        io2_module.o\
        force_nloc2_mol_module.o\

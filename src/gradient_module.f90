@@ -3,7 +3,7 @@ MODULE gradient_module
   use grid_module, only: grid
   use bc_module, only: www, bcset
   use fd_module, only: fd,construct_nabla_fd,destruct_nabla_fd
-  use lattice_module, only: lattice,construct_aa_lattice,get_reciprocal_lattice
+  use lattice_module, only: lattice,get_aa_lattice,get_reciprocal_lattice
   use basic_type_factory
 
   implicit none
@@ -47,7 +47,7 @@ CONTAINS
 
 ! ---
 
-    call construct_aa_lattice( aa )
+    call get_aa_lattice( aa )
     call get_reciprocal_lattice( aa, bb )
     pi2      = 2.0d0*acos(-1.0d0)
     b(1:3,1) = aa%Length(1)*bb%LatticeVector(1:3,1)/( pi2*rgrid%spacing(1) )
@@ -141,7 +141,7 @@ CONTAINS
 
 ! ---
 
-    call construct_aa_lattice( aa )
+    call get_aa_lattice( aa )
     call get_reciprocal_lattice( aa, bb )
     pi2      = 2.0q0*acos(-1.0q0)
     b(1:3,1) = aa%Length(1)*bb%LatticeVector(1:3,1)/( pi2*rgrid%spacing(1) )

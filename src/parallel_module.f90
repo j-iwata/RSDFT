@@ -6,6 +6,9 @@ MODULE parallel_module
 
 !  PRIVATE
   PRIVATE :: send_parallel
+  PRIVATE :: dr, construct_dr
+  PUBLIC :: para, construct_para
+  PUBLIC :: get_np_parallel
   PUBLIC :: node_partition &
            ,comm_grid, comm_band, comm_bzsm, comm_spin &
            ,myrank,myrank_g,myrank_b,myrank_k,myrank_s &
@@ -37,7 +40,60 @@ MODULE parallel_module
   integer,allocatable :: pinfo_grid(:,:)
   logical :: disp_switch_parallel=.false.
 
+  type dr
+     integer :: np
+     integer,allocatable :: id(:)
+     integer,allocatable :: ir(:)
+  end type dr
+
+  type para
+     integer  :: np(0:7)
+     type(dr) :: grid
+     type(dr) :: band
+     type(dr) :: bzsm
+     type(dr) :: spin
+  end type para
+
 CONTAINS
+
+
+  SUBROUTINE get_np_parallel( np )
+    implicit none
+    integer,intent(OUT) :: np(0:)
+    integer :: n
+    np(0)=nprocs
+    n=size(np)-1
+    np(1:n)=node_partition(1:n)
+  END SUBROUTINE get_np_parallel
+
+
+  SUBROUTINE construct_para( ng, nb, nk, ns, p )
+    implicit none
+    integer,intent(IN) :: ng, nb, nk, ns
+    type(para),intent(INOUT) :: p
+    call construct_dr( ng, p%np(1)*p%np(2)*p%np(3), p%grid )
+    call construct_dr( nb, p%np(4)                , p%band )
+    call construct_dr( nk, p%np(5)                , p%bzsm )
+    call construct_dr( ns, p%np(6)                , p%spin )
+  END SUBROUTINE construct_para
+
+
+  SUBROUTINE construct_dr( nn, np, p )
+    implicit none
+    integer,intent(IN) :: nn, np
+    type(dr),intent(INOUT) :: p
+    integer :: i,j
+    p%np=np
+    allocate( p%id(0:np-1) ) ; p%id=0
+    allocate( p%ir(0:np-1) ) ; p%ir=0
+    do i=0,nn-1
+       j=mod( i, np )
+       p%ir(j)=p%ir(j)+1
+    end do
+    do j=0,np-1
+       p%id(j) = sum( p%ir(0:j) ) - p%ir(j)
+    end do
+  END SUBROUTINE construct_dr
 
 
   SUBROUTINE start_mpi_parallel

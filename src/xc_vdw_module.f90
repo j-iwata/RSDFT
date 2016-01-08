@@ -7,7 +7,7 @@ MODULE xc_vdw_module
   use gradient_module
   use parallel_module, only: comm_grid, myrank, nprocs, ir_grid, id_grid
   use fd_module, only: fd, construct_nabla_fd, destruct_nabla_fd
-  use lattice_module, only: lattice,construct_aa_lattice,get_reciprocal_lattice
+  use lattice_module, only: lattice,get_aa_lattice,get_reciprocal_lattice
   use basic_type_factory
   use fft_module
 
@@ -21,7 +21,7 @@ MODULE xc_vdw_module
 
   real(8) :: Qmax=5.0d0
   real(8) :: Qmin=0.0d0
-  integer :: NumQgrid=1
+  integer :: NumQgrid=20
   real(8) :: SizeQgrid
   real(8),allocatable :: Qgrid(:)
   real(8) :: Dmax=48.6d0
@@ -46,7 +46,7 @@ CONTAINS
 
     if ( flag_init ) return
 
-    call write_border(30," init_xc_vdw(start)")
+    call write_border( 1, " init_xc_vdw(start)" )
 
     SizeQgrid = Qmax / NumQgrid
     allocate( Qgrid(0:NumQgrid) ) ; Qgrid=0.0d0
@@ -79,7 +79,7 @@ CONTAINS
 
     flag_init = .true.
 
-    call write_border(30," init_xc_vdw(end)")
+    call write_border( 1, " init_xc_vdw(end)")
 
   END SUBROUTINE init_xc_vdw
 
@@ -522,7 +522,7 @@ CONTAINS
     real(8),allocatable :: ua(:,:), pol_drv(:,:), f(:), g(:)
     complex(8),allocatable :: theta(:,:)
 
-    call write_border(30," calc_xc_vdw(start)")
+    call write_border( 1, " calc_xc_vdw(start)" )
 
     pi     = acos(-1.0q0)
     onethr = 1.0q0/3.0q0
@@ -596,14 +596,14 @@ CONTAINS
     Ex_LDA = rbuf(1)
     Ec_LDA = rbuf(2)
 
-    call check_disp_switch( disp_sw, 0 )
-    if ( disp_sw ) then
-       write(*,*) "ss(min,max)=",ss_min,ss_max
-       write(*,*) "q0(min,max)=",q0_min,q0_max
-       write(*,*) "Ex_LDA =",Ex_LDA
-       write(*,*) "Ec_LDA =",Ec_LDA
-       write(*,*) "Exc_LDA=",Ex_LDA+Ec_LDA
-    end if
+!    call check_disp_switch( disp_sw, 0 )
+!    if ( disp_sw ) then
+!       write(*,*) "ss(min,max)=",ss_min,ss_max
+!       write(*,*) "q0(min,max)=",q0_min,q0_max
+!       write(*,*) "Ex_LDA =",Ex_LDA
+!       write(*,*) "Ec_LDA =",Ec_LDA
+!       write(*,*) "Exc_LDA=",Ex_LDA+Ec_LDA
+!    end if
 
 ! ---
 
@@ -679,7 +679,7 @@ CONTAINS
 
     call destruct_gradient16( grad16 )
 
-    call write_border(30," calc_xc_vdw(end)")
+    call write_border( 1, " calc_xc_vdw(end)" )
 
   END SUBROUTINE calc_xc_vdw
 
@@ -946,11 +946,11 @@ CONTAINS
     E0 = 0.5d0*z * rgrid%g1%size_global * rgrid%VolumeElement
     call MPI_ALLREDUCE(E0,Ec,1,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,info)
 
-    call check_disp_switch( disp_sw, 0 )
-    if ( disp_sw ) then
-       write(*,*) "Ec_vdw=",Ec
-       write(*,*) "Ec_vdw+Ec_LDA=",Ec+Ec_LDA
-    end if
+!    call check_disp_switch( disp_sw, 0 )
+!    if ( disp_sw ) then
+!       write(*,*) "Ec_vdw=",Ec
+!       write(*,*) "Ec_vdw+Ec_LDA=",Ec+Ec_LDA
+!    end if
 
   END SUBROUTINE calc_vdw_energy
 
@@ -1163,7 +1163,7 @@ CONTAINS
     call construct_nabla_fd( nabla )
     Md = nabla%md
 
-    call construct_aa_lattice( aa )
+    call get_aa_lattice( aa )
     call get_reciprocal_lattice( aa, bb )
     b(1:3,1)=aa%Length(1)*bb%LatticeVector(1:3,1)/( 2*pi*rgrid%spacing(1) )
     b(1:3,2)=aa%Length(2)*bb%LatticeVector(1:3,2)/( 2*pi*rgrid%spacing(2) )

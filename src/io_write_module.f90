@@ -48,6 +48,7 @@ CONTAINS
     integer,parameter :: TYPE_MAIN=MPI_COMPLEX16
     integer,parameter :: TYPE_WF=0
 #endif
+    type(para) :: pinfo
 
     call write_border( 1, " simple_wf_io_write(start)" )
     if ( DISP_SWITCH ) write(*,*) "OC =",OC
@@ -116,7 +117,7 @@ CONTAINS
           if ( TYPE_WF == 1 ) print*,'WF: real(8) -> real(8)'
        end if
 
-    case(4,5,14,15)
+    case(4,5)
 
        if ( DISP_SWITCH ) then
           if ( TYPE_WF == 0 ) print*,'WF: complex(8) -> complex(4)'
@@ -140,6 +141,15 @@ CONTAINS
           write(unit) LL2(:,:)
           write(unit) occ(:,:,:)
           write(unit) aa,bb,kbb
+
+          call get_np_parallel( pinfo%np )
+          call construct_para( ML, MB, MK, MS, pinfo )
+
+          write(unit) pinfo%np
+          write(unit) pinfo%grid%id,pinfo%grid%ir
+          write(unit) pinfo%band%id,pinfo%band%ir
+          write(unit) pinfo%bzsm%id,pinfo%bzsm%ir
+          write(unit) pinfo%spin%id,pinfo%spin%ir
 
        else if ( OC >= 10 ) then   !--- old format ---
 
@@ -207,7 +217,7 @@ CONTAINS
              select case(OC)
              case default
                 write(unit) utmp(:)
-             case(4,5,14,15)
+             case(4,5)
                 utmpSP(:)=utmp(:)
                 write(unit) utmpSP(:)
              end select
@@ -219,7 +229,7 @@ CONTAINS
              select case(OC)
              case default
                 write(unit) unk(n1:n2,n,k,s)
-             case(4,5,14,15)
+             case(4,5)
                 utmpSP(n1:n2)=unk(n1:n2,n,k,s)
                 write(unit) utmpSP(n1:n2)
              end select

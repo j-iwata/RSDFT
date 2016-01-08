@@ -1,4 +1,4 @@
-# RSDFT ( ver.1.0.0 )
+# RSDFT ( ver.1.0.1 )
 
 Real-space finite-difference pseudopotential density-functional-theory code for first-principles material simulations on massively-parallel computers
 
@@ -45,5 +45,9 @@ utility/	Utility programs
 
 This product includes software developed by the University of Chicago, as Operator of Argonne National Laboratory.
 
+## FFTE ( src/ext2/ )
+
+This product includes a fast Fourier transform package FFTE
+( http://www.ffte.jp )
 
 

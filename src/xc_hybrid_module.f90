@@ -1,7 +1,8 @@
 MODULE xc_hybrid_module
 
-  use xc_hybrid_io_module
   use io_tools_module
+  use wf_module, only: wfrange
+  use io_read_module
 
   implicit none
 
@@ -91,6 +92,7 @@ CONTAINS
     real(8),parameter :: eps=1.d-5
     real(8) :: mem(9),qtry(3),c,Pi,k_fock(3)
     real(8),allocatable :: qtmp(:,:)
+    type(wfrange) :: b
 
     call write_border( 0, " init_xc_hybrid(start)" )
 
@@ -163,6 +165,7 @@ CONTAINS
     FKBZ_0 = 1
     FKBZ_1 = MBZ
     FKMMBZ = MMBZ
+    FKMB   = MB
     FKMB_0 = 1
     FKMB_1 = MB/np_fkmb
     if ( FKMB_1*np_fkmb < MB ) FKMB_1=FKMB_1+1
@@ -177,26 +180,45 @@ CONTAINS
 
        mem(1)=byte*(n2-n1+1)*(FKMB_1-FKMB_0+1) &
             *(FKBZ_1-FKBZ_0+1)*(MSP_1-MSP_0+1)
-       !mem(2)=byte*(n2-n1+1)*(MB_1-MB_0+1) &
-       !     *(MBZ_1-MBZ_0+1)*(MSP_1-MSP_0+1)
 
        if ( disp_switch ) then
           write(*,*) "size(unk_hf)(MB)=",mem(1)/1024.d0**2
-          !write(*,*) "size(VFunk )(MB)=",mem(2)/1024.d0**2
        end if
 
        allocate( unk_hf(n1:n2,FKMB_0:FKMB_1,FKBZ_0:FKBZ_1,MSP_0:MSP_1) )
        unk_hf=(0.0d0,0.0d0)
        allocate( occ_hf(FKMB_0:FKMB_1,FKBZ_0:FKBZ_1,MSP) )
        occ_hf=0.0d0
-       !allocate( VFunk(n1:n2,MB_0:MB_1,MBZ_0:MBZ_1,MSP_0:MSP_1) )
-       !VFunk=(0.0d0,0.0d0)
 
     else if ( IC > 0 ) then
 
-       call read_xc_hybrid_io( file_wf2, SYStype, IO_ctrl, disp_switch &
-            ,n1,n2, MSP_0,MSP_1, unk_hf, occ_hf, kbb_hf &
-            ,FKMB,FKMB_0,FKMB_1,FKBZ,FKBZ_0,FKBZ_1,FKMMBZ )
+!       call read_xc_hybrid_io( file_wf2, SYStype, IO_ctrl, disp_switch &
+!            ,n1,n2, MSP_0,MSP_1, unk_hf, occ_hf, kbb_hf &
+!            ,FKMB,FKMB_0,FKMB_1,FKBZ,FKBZ_0,FKBZ_1,FKMMBZ )
+
+       b%ML0 = n1
+       b%ML1 = n2
+       b%MB  = 0
+       b%MB0 = 0
+       b%MB1 = 0
+       b%MK  = 0
+       b%MK0 = 0
+       b%MK1 = 0
+       b%MMK = 0
+       b%MS  = MSP
+       b%MS0 = MSP_0
+       b%MS1 = MSP_1
+
+       call simple_wf_io_read( file_wf2, SYStype, IO_ctrl, disp_switch &
+            , b, unk_hf, occ_hf, kbb_hf )
+
+       FKMB   = b%MB
+       FKMB_0 = b%MB0
+       FKMB_1 = b%MB1
+       FKBZ   = b%MK
+       FKBZ_0 = b%MK0
+       FKBZ_1 = b%MK1
+       FKMMBZ = b%MMK
 
     end if
 

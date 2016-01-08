@@ -4,7 +4,7 @@ MODULE xc_ggapbe96_2_module
   use grid_module, only: grid, get_map_3d_to_1d
   use xc_variables, only: xcpot, xcene
   use fd_module, only: fd, construct_nabla_fd
-  use lattice_module
+  use lattice_module, only: lattice, get_aa_lattice, get_reciprocal_lattice
   use parallel_module
   use basic_type_factory
 
@@ -64,7 +64,7 @@ CONTAINS
     if ( .not.allocated(nab) ) allocate( nab(-Md:Md) )
     nab(:) = nabla%coef(:)
 
-    call construct_aa_lattice( aa )
+    call get_aa_lattice( aa )
     call get_reciprocal_lattice( aa, bb )
 
     Pi=acos(-1.0q0)

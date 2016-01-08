@@ -221,12 +221,6 @@ PROGRAM Real_Space_DFT
 
   call sym_rho( ML_0, ML_1, Nspin, MSP_0, MSP_1, rho )
 
-! --- Initial setup for Hybrid XC functional ---
-
-  call init_xc_hybrid( ML_0, ML_1, Nelectron, Nspin, Nband &
-       , MMBZ, Nbzsm, MBZ_0, MBZ_1, MSP, MSP_0, MSP_1, MB_0, MB_1 &
-       , kbb, bb, Va, SYStype, np_fkmb, disp_switch )
-
 !-------------------- Hamiltonian Test
 
   if ( iswitch_test == 1 ) then
@@ -280,6 +274,12 @@ PROGRAM Real_Space_DFT
         end do
      end do
   end if
+
+! --- Initial setup for Hybrid XC functional ---
+
+  call init_xc_hybrid( ML_0, ML_1, Nelectron, Nspin, Nband &
+       , MMBZ, Nbzsm, MBZ_0, MBZ_1, MSP, MSP_0, MSP_1, MB_0, MB_1 &
+       , kbb, bb, Va, SYStype, np_fkmb, disp_switch )
 
 ! --- Initial Potential ---
 

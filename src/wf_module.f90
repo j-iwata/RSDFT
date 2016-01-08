@@ -14,6 +14,8 @@ MODULE wf_module
            ,hunk, read_wf, iflag_hunk, workwf &
            ,allocate_work_wf, deallocate_work_wf
   PUBLIC :: write_esp_wf
+  PUBLIC :: wfrange
+  PUBLIC :: allocate_b_wf, allocate_b_occ
 
 #ifdef _DRSDFT_
   real(8),parameter :: zero=0.d0
@@ -46,6 +48,13 @@ MODULE wf_module
 
   integer :: iwork_wf=0
   integer :: iflag_hunk=0
+
+  type wfrange
+     integer :: ML,ML0,ML1
+     integer :: MB,MB0,MB1
+     integer :: MK,MK0,MK1,MMK
+     integer :: MS,MS0,MS1
+  end type wfrange
 
 CONTAINS
 
@@ -346,6 +355,27 @@ CONTAINS
     end do
     end do
   END SUBROUTINE write_esp_wf
+
+
+  SUBROUTINE allocate_b_wf( b, wf )
+    implicit none
+    type(wfrange),intent(INOUT) :: b
+#ifdef _DRSDFT_
+    real(8),allocatable,intent(INOUT) :: wf(:,:,:,:)
+#else
+    complex(8),allocatable,intent(INOUT) :: wf(:,:,:,:)
+#endif
+    allocate( wf(b%ML0:b%ML1,b%MB0:b%MB1,b%MK0:b%MK1,b%MS0:b%MS1) )
+    wf=(0.0d0,0.0d0)
+  END SUBROUTINE allocate_b_wf
+
+  SUBROUTINE allocate_b_occ( b, occup )
+    implicit none
+    type(wfrange),intent(INOUT) :: b
+    real(8),allocatable,intent(INOUT) :: occup(:,:,:)
+    allocate( occup(b%MB0:b%MB1,b%MK0:b%MK1,b%MS0:b%MS1) )
+    occup=0.0d0
+  END SUBROUTINE allocate_b_occ
 
 
 END MODULE wf_module
