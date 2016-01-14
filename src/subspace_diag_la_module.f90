@@ -51,7 +51,10 @@ CONTAINS
     et(:)=0.d0
 
 #ifdef _DRSDFT_
-    idiag0 = "dsyevd"
+    idiag0 = "dsyev"
+!   idiag0 = "dsyevd"
+! DSYEVD of Intel MKL 11.2 Update 1 or earlier may have failure
+! (see https://software.intel.com/en-us/articles/intel-mkl-112-bug-fixes)
 #else
     idiag0 = "zheevd"
 #endif
@@ -91,7 +94,7 @@ CONTAINS
 
 #ifdef _DRSDFT_
     call dsyr2k('U','T',MB,ML0,zz,unk(n1,1,k,s),ML0,psit,ML0,zero,Hsub,MB)
-!    call dgemm('C','N',MB,MB,ML0, dV,unk(n1,1,k,s),ML0,psit,ML0,zero,Hsub,MB)
+!    call dgemm('T','N',MB,MB,ML0, dV,unk(n1,1,k,s),ML0,psit,ML0,zero,Hsub,MB)
 #else
     call zher2k('U','C',MB,ML0,zz,unk(n1,1,k,s),ML0,psit,ML0,zero,Hsub,MB)
 !    call zgemm('C','N',MB,MB,ML0,zdV,unk(n1,1,k,s),ML0,psit,ML0,zero,Hsub,MB)
@@ -167,8 +170,8 @@ CONTAINS
 
     case('dsyevd')
 
-!       if ( LWORK==0  ) LWORK=1+6*MB+2*MB*MB
-!       if ( LIWORK==0 ) LIWORK=3+5*MB
+       if ( LWORK==0  ) LWORK=1+6*MB+2*MB*MB
+       if ( LIWORK==0 ) LIWORK=3+5*MB
        if ( LWORK == 0 .and. LIWORK == 0 ) then
           call DSYEVD('V','U',MB,Hsub,MB,esp(1,k,s),rtmp,-1,itmp,-1,ierr)
           LWORK=nint(rtmp(1))
