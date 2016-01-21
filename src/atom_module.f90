@@ -22,6 +22,7 @@ MODULE atom_module
   real(DP),allocatable,PUBLIC :: aa_atom(:,:)
   integer :: iformat=0
   integer :: iformat_org=0
+  real(DP),parameter :: bohr=0.529177d0
 
   include 'mpif.h'
 
@@ -161,6 +162,7 @@ CONTAINS
        Nelement=0
        do i=1,Natom
           read(unit,*) cbuf, aa_atom(1:3,i)
+          aa_atom(1:3,i)=aa_atom(1:3,i)/bohr
           call get_atomic_number( cbuf, ki_atom(i) )
           if ( Nelement==0 .or. all(idummy(1:Nelement)/=ki_atom(i)) ) then
              Nelement=Nelement+1
@@ -215,6 +217,8 @@ CONTAINS
        Z=7
     case( "O" )
        Z=8
+    case( "AL" )
+       Z=13
     case( "SI" )
        Z=14
     case default
@@ -304,6 +308,38 @@ CONTAINS
        aa_atom(1:3,i) = xyz_atom(1:3)
     end do
   END SUBROUTINE convert_to_xyz_coordinates_atom
+
+
+  SUBROUTINE get_dist( i, j, aa, aa_atom, d )
+    implicit none
+    integer,intent(IN)  :: i,j
+    real(8),intent(IN)  :: aa(3,3),aa_atom(:,:)
+    real(8),intent(OUT) :: d
+    real(8) :: ri(3),rj(3)
+    ri=matmul(aa,aa_atom(:,i))
+    rj=matmul(aa,aa_atom(:,j))
+    d=sqrt( sum((ri-rj)**2) )
+  END SUBROUTINE get_dist
+
+
+  SUBROUTINE shift_aa_coordinates_atom( aa_atom )
+    implicit none
+    real(8),intent(INOUT) :: aa_atom(:,:)
+    integer :: i,j
+    do i=1,size(aa_atom,2)
+       do j=1,3
+10        if ( aa_atom(j,i) < 0.0d0 ) then
+             aa_atom(j,i)=aa_atom(j,i)+1.0d0
+             goto 10
+          else if ( aa_atom(j,i) >= 1.0d0 ) then
+             aa_atom(j,i)=aa_atom(j,i)-1.0d0
+             goto 10
+          else
+             cycle
+          end if
+       end do
+    end do
+  END SUBROUTINE shift_aa_coordinates_atom
 
 
   SUBROUTINE write_coordinates_atom( unit, write_ctrl )

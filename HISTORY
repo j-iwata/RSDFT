@@ -1,3 +1,6 @@
+RSDFT ( ver.1.0.3 )
+  Bug fix: reading xyz-format in atom_module
+
 RSDFT ( ver.1.0.2 )
   Default diagonalization routine in subspace_diag_la_module.f90 has been chenged from DSYEVD to DSYEV, because older MKL (11.2 Update 1 or earlier) may have a failure
  

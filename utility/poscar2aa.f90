@@ -5,11 +5,11 @@ PROGRAM poscar2aa
 
   implicit none
 
-  integer,parameter :: u1 = 5,  u2 = 970, u3 = 6
+  integer,parameter :: u1 = 5,  u2 = 970, u3 = 970 !u3 = 6
   real(8),parameter :: bohr = 0.529177d0
   real(8),allocatable :: asi(:,:),rsi(:,:)
   real(8) :: ax,aa(3,3),bb(3,3)
-  character(30) :: cbuf, cbuf2
+  character(30) :: cbuf, cbuf2, format_type
   integer :: i,j,k,l2,ne,ichk,natm_tot,natm(10)
 
   read(u1,*)
@@ -43,7 +43,7 @@ PROGRAM poscar2aa
   backspace(u1)
 
   read(u1,*) natm(1:ne)
-  read(u1,*)
+  read(u1,*) format_type
 
   natm_tot = sum( natm(1:ne) )
 
@@ -64,11 +64,16 @@ PROGRAM poscar2aa
 
   aa(:,:) = ax*aa(:,:)
 
-  rsi(:,:) = ax*rsi(:,:)
-
-  call calc_aainv( aa, bb )
-
-  asi(:,:) = matmul( bb(:,:), rsi(:,:) )
+  if ( format_type == "Cartesian" ) then
+     rsi(:,:) = ax*rsi(:,:)
+     call calc_aainv( aa, bb )
+     asi(:,:) = matmul( bb(:,:), rsi(:,:) )
+  else if ( format_type == "Direct" ) then
+     asi(:,:) = rsi(:,:)
+  else
+     write(*,*) "format_type  ",format_type,"  is unknown"
+     stop
+  end if
 
 ! output
 
