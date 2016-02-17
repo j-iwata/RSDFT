@@ -128,6 +128,7 @@ CONTAINS
     call write_border( 0, " check_Nband_electron(start)" )
     if ( dble(Nband) < 0.5d0*Nelectron ) then
        Nband = nint( 0.5d0*Nelectron * factor )
+       Nband = max( Nband, 8 )
        write(mesg,'(1x,"Nband is replaced to ",i8)') Nband
        call write_string( mesg )
     end if

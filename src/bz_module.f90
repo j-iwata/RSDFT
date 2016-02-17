@@ -36,8 +36,8 @@ CONTAINS
     npbz=0
     use_inversion=1
     call IOTools_readIntegerKeyword( "NK", nk )
-    call IOTools_readIntegerKeywords( "MMM1", mmm(:,1) )
-    call IOTools_readIntegerKeywords( "MMM2", mmm(:,2) )
+    call IOTools_readIntegerKeyword( "MMM1", mmm(:,1) )
+    call IOTools_readIntegerKeyword( "MMM2", mmm(:,2) )
     call IOTools_readIntegerKeyword( "NPBZ", npbz )
     call IOTools_readIntegerKeyword( "INVBZ", use_inversion )
   END SUBROUTINE read_bz

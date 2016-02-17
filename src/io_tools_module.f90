@@ -6,23 +6,26 @@ MODULE io_tools_module
   PUBLIC :: init_io_tools
   PUBLIC :: IOTools_readStringKeyword
   PUBLIC :: IOTools_readIntegerKeyword
-  PUBLIC :: IOTools_readIntegerKeywords
   PUBLIC :: IOTools_readReal8Keyword
   PUBLIC :: IOTools_readReal8Keywords
   PUBLIC :: IOTools_readIntegerString
   PUBLIC :: IOTools_findKeyword
-!  PUBLIC :: IOTools_readRealVectorKeyword
-!  PUBLIC :: IOTools_readLogicalKeyword
-!  PUBLIC :: IOTools_readIntegerVectorKeyword
-!  PUBLIC :: IOTools_bcastIntegerParameter
 
   integer,parameter :: max_trial_read = 10000
 
+#ifndef _NOMPI_
   include 'mpif.h'
+#endif
 
-  integer :: myrank
-  integer :: unit_default
+  integer :: myrank = 0
+  integer :: unit_default = 1
   integer :: unit_input_result = 110
+  logical :: flag_init = .false.
+
+  INTERFACE IOTools_readIntegerKeyword
+     MODULE PROCEDURE IOTools_readIntegerKeyword_sca &
+                     ,IOTools_readIntegerKeyword_vec
+  END INTERFACE
 
 CONTAINS
 
@@ -33,7 +36,23 @@ CONTAINS
     myrank = myrank_in
     unit_default = unit_in
 !    if ( myrank == 0 ) open(unit_input_result,file="input_result")
+    flag_init = .true.
   END SUBROUTINE init_io_tools
+
+  SUBROUTINE check_init
+    implicit none
+    integer :: ierr
+#ifdef _NOMPI_
+    flag_init = .true.
+    return
+#else
+    include 'mpif.h'
+    if ( .not.flag_init ) then
+       call MPI_COMM_RANK( MPI_COMM_WORLD, myrank, ierr )
+    end if
+    flag_init = .true.
+#endif
+  END SUBROUTINE check_init
 
 
   SUBROUTINE IOTools_readStringKeyword( keyword, variable, unit_in )
@@ -43,6 +62,7 @@ CONTAINS
     integer,optional,intent(IN) :: unit_in
     character(10) :: cbuf,ckey
     integer :: i,unit
+    call check_init
     unit=unit_default ; if ( present(unit_in) ) unit=unit_in
     if ( myrank == 0 ) then
        rewind unit
@@ -56,18 +76,22 @@ CONTAINS
              exit
           end if
        end do ! i
+999    continue
     end if
-999 call mpi_bcast( variable,len(variable),MPI_CHARACTER,0,MPI_COMM_WORLD,i )
+#ifndef _NOMPI_
+    call MPI_BCAST( variable,len(variable),MPI_CHARACTER,0,MPI_COMM_WORLD,i )
+#endif
   END SUBROUTINE IOTools_readStringKeyword
 
 
-  SUBROUTINE IOTools_readIntegerKeyword( keyword, variable, unit_in )
+  SUBROUTINE IOTools_readIntegerKeyword_sca( keyword, variable, unit_in )
     implicit none
     character(*),intent(IN) :: keyword
     integer,intent(INOUT) :: variable
     integer,optional,intent(IN) :: unit_in
     character(10) :: cbuf,ckey
     integer :: i,unit
+    call check_init
     unit=unit_default ; if ( present(unit_in) ) unit=unit_in
     if ( myrank == 0 ) then
        rewind unit
@@ -84,17 +108,20 @@ CONTAINS
 999    continue
        !write(unit_input_result,'(a10,3x,i10)') keyword,variable
     end if
+#ifndef _NOMPI_
     call MPI_BCAST(variable,1,MPI_INTEGER,0,MPI_COMM_WORLD,i)
-  END SUBROUTINE IOTools_readIntegerKeyword
+#endif
+  END SUBROUTINE IOTools_readIntegerKeyword_sca
 
 
-  SUBROUTINE IOTools_readIntegerKeywords( keyword, variables, unit_in )
+  SUBROUTINE IOTools_readIntegerKeyword_vec( keyword, variables, unit_in )
     implicit none
     character(*),intent(IN) :: keyword
     integer,intent(INOUT) :: variables(:)
     integer,optional,intent(IN) :: unit_in
     character(10) :: cbuf,ckey
     integer :: i,unit
+    call check_init
     unit=unit_default ; if ( present(unit_in) ) unit=unit_in
     if ( myrank == 0 ) then
        rewind unit
@@ -104,13 +131,16 @@ CONTAINS
           if ( ckey == keyword ) then
              backspace(unit)
              read(unit,*) cbuf,variables(:)
-             write(*,'(1x,A10," : ",3I10)') keyword,variables(:)
+             write(*,'(1x,A10," : ",7I10)') keyword,variables(:)
              exit
           end if
        end do ! i
+999    continue
     end if
-999 call MPI_BCAST(variables,size(variables),MPI_INTEGER,0,MPI_COMM_WORLD,i)
-  END SUBROUTINE IOTools_readIntegerKeywords
+#ifndef _NOMPI_
+    call MPI_BCAST(variables,size(variables),MPI_INTEGER,0,MPI_COMM_WORLD,i)
+#endif
+  END SUBROUTINE IOTools_readIntegerKeyword_vec
 
 
   SUBROUTINE IOTools_readReal8Keyword( keyword, variable, unit_in )
@@ -120,6 +150,7 @@ CONTAINS
     integer,optional,intent(IN) :: unit_in
     character(10) :: cbuf,ckey
     integer :: i,unit
+    call check_init
     unit=unit_default ; if ( present(unit_in) ) unit=unit_in
     if ( myrank == 0 ) then
        rewind unit
@@ -137,8 +168,11 @@ CONTAINS
              exit
           end if
        end do ! i
+999    continue
     end if
-999 call MPI_BCAST(variable,1,MPI_REAL8,0,MPI_COMM_WORLD,i)
+#ifndef _NOMPI_
+    call MPI_BCAST(variable,1,MPI_REAL8,0,MPI_COMM_WORLD,i)
+#endif
   END SUBROUTINE IOTools_readReal8Keyword
 
 
@@ -149,6 +183,7 @@ CONTAINS
     integer,optional,intent(IN) :: unit_in
     character(10) :: cbuf,ckey
     integer :: i,unit
+    call check_init
     unit=unit_default ; if ( present(unit_in) ) unit=unit_in
     if ( myrank == 0 ) then
        rewind unit
@@ -166,8 +201,11 @@ CONTAINS
              exit
           end if
        end do ! i
+999    continue
     end if
-999 call MPI_BCAST(variables,size(variables),MPI_REAL8,0,MPI_COMM_WORLD,i)
+#ifndef _NOMPI_
+    call MPI_BCAST(variables,size(variables),MPI_REAL8,0,MPI_COMM_WORLD,i)
+#endif
   END SUBROUTINE IOTools_readReal8Keywords
 
 
@@ -180,6 +218,7 @@ CONTAINS
     logical,optional,intent(IN) :: norewind
     character(10) :: cbuf,ckey
     integer :: i,unit
+    call check_init
     unit=unit_default ; if ( present(u) ) unit=u
     if ( myrank == 0 ) then
        if ( .not.present(norewind) ) rewind unit
@@ -193,9 +232,12 @@ CONTAINS
              exit
           end if
        end do ! i
+999    continue
     end if
-999 call MPI_BCAST(variable1,1,MPI_INTEGER,0,MPI_COMM_WORLD,i)
+#ifndef _NOMPI_
+    call MPI_BCAST(variable1,1,MPI_INTEGER,0,MPI_COMM_WORLD,i)
     call MPI_BCAST(variable2,len(variable2),MPI_CHARACTER,0,MPI_COMM_WORLD,i)
+#endif
   END SUBROUTINE IOTools_readIntegerString
 
 
@@ -207,6 +249,7 @@ CONTAINS
     logical,optional,intent(IN) :: flag_bcast
     integer :: i,unit
     character(10) :: cbuf,ckey
+    call check_init
     unit=unit_default
     if ( present(unit_out) ) unit_out=unit
     hasKeyword = .false.
@@ -221,122 +264,14 @@ CONTAINS
           end if
        end do ! i
        if ( hasKeyword ) write(*,'(1x,A10)') keyword
+999    continue
     end if
-999 continue
     if ( present(flag_bcast) ) then
+#ifndef _NOMPI_
        call MPI_BCAST( hasKeyword, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, i )
+#endif
     end if
   END SUBROUTINE IOTools_findKeyword
-
-#ifdef TEST
-  SUBROUTINE IOTools_readRealKeyword(keyword,unit_number,keyword_variable)
-    implicit none
-    character(*),intent(IN) :: keyword
-    integer,intent(IN) :: unit_number
-    real(8),intent(OUT) :: keyword_variable
-    logical :: hasKeyword=.false.
-    integer :: i
-    character(10) :: cbuf,ckey
-    integer :: keyword_length
-    keyword_length=len_trim(keyword)
-    rewind unit_number
-    do i=1,10000
-      read(unit_number,*,END=999) cbuf
-      call convertToCapital(cbuf,ckey)
-      if ( ckey==keyword ) then
-        backspace(unit_number)
-        read(unit_number,*) cbuf,keyword_variable
-        hasKeyword=.true.
-        exit
-      endif
-    enddo
-999 continue
-    if ( hasKeyword ) write(*,'(1x,A10," : ",F20.12)') keyword,keyword_variable
-  END SUBROUTINE IOTools_readRealKeyword
-
-  SUBROUTINE IOTools_readRealVectorKeyword(keyword,unit_number,keyword_variable)
-    implicit none
-    character(*),intent(IN) :: keyword
-    integer,intent(IN) :: unit_number
-    real(8),intent(OUT) :: keyword_variable(1:3)
-    logical :: hasKeyword=.false.
-    integer :: i
-    character(10) :: cbuf,ckey
-    integer :: keyword_length
-    keyword_length=len_trim(keyword)
-    rewind unit_number
-    do i=1,10000
-      read(unit_number,*,END=999) cbuf
-      call convertToCapital(cbuf,ckey)
-      if ( ckey==keyword ) then
-        backspace(unit_number)
-        read(unit_number,*) cbuf,keyword_variable
-        hasKeyword=.true.
-        exit
-      endif
-    enddo
-999 continue
-    if ( hasKeyword ) write(*,'(1x,A10," : ",3F20.12)') keyword,keyword_variable
-  END SUBROUTINE IOTools_readRealVectorKeyword
-
-  SUBROUTINE IOTools_readIntegerVectorKeyword(keyword,unit_number,keyword_variable)
-    implicit none
-    character(*),intent(IN) :: keyword
-    integer,intent(IN) :: unit_number
-    integer,intent(OUT) :: keyword_variable(1:3)
-    logical :: hasKeyword=.false.
-    integer :: i
-    character(10) :: cbuf,ckey
-    integer :: keyword_length
-    keyword_length=len_trim(keyword)
-    rewind unit_number
-    do i=1,10000
-      read(unit_number,*,END=999) cbuf
-      call convertToCapital(cbuf,ckey)
-      if ( ckey==keyword ) then
-        backspace(unit_number)
-        read(unit_number,*) cbuf,keyword_variable
-        hasKeyword=.true.
-        exit
-      endif
-    enddo
-999 continue
-    if ( hasKeyword ) write(*,'(1x,A10," : ",3I10)') keyword,keyword_variable
-  END SUBROUTINE IOTools_readIntegerVectorKeyword
-
-  SUBROUTINE IOTools_readLogicalKeyword(keyword,unit_number,keyword_variable)
-    implicit none
-    character(*),intent(IN) :: keyword
-    integer,intent(IN) :: unit_number
-    logical,intent(OUT) :: keyword_variable
-    logical :: hasKeyword=.false.
-    integer :: i
-    character(10) :: cbuf,ckey
-    integer :: keyword_length
-    keyword_length=len_trim(keyword)
-    rewind unit_number
-    do i=1,10000
-      read(unit_number,*,END=999) cbuf
-      call convertToCapital(cbuf,ckey)
-      if ( ckey==keyword ) then
-        backspace(unit_number)
-        read(unit_number,*) cbuf,keyword_variable
-        hasKeyword=.true.
-        exit
-      endif
-    enddo
-999 continue
-    if ( hasKeyword ) write(*,'(1x,A10," : ",L10)') keyword,keyword_variable
-  END SUBROUTINE IOTools_readLogicalKeyword
-#endif
-
-
-  SUBROUTINE IOTools_bcastIntegerParameter( i )
-    implicit none
-    integer,intent(INOUT) :: i(:)
-    integer :: ierr
-    call MPI_BCAST( i, size(i), MPI_INTEGER, 0, MPI_COMM_WORLD, ierr )
-  END SUBROUTINE IOTools_bcastIntegerParameter
 
 
   SUBROUTINE convertToCapital(cbuf,CKEY)

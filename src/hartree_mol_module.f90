@@ -49,7 +49,7 @@ CONTAINS
     implicit none
     integer :: itmp(2)
     itmp=-1
-    call IOTools_readIntegerKeywords( "MEO", itmp )
+    call IOTools_readIntegerKeyword( "MEO", itmp )
     if ( itmp(1) > 0 ) MEO = itmp(1)
     if ( itmp(2) > 0 ) Lmax_ME = itmp(2)
   END SUBROUTINE read_param_hartree_mol

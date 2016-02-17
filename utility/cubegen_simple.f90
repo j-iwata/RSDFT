@@ -45,9 +45,16 @@ PROGRAM cubegen_simple
      aL(i)=sqrt( sum(aa(:,i)**2) )
   end do
 
-  if ( ckey == "XYZ" ) call convert_xyz2aa( MI, aa, asi )
-
-  rsi=matmul( aa,asi )
+  if ( ckey == "XYZ" ) then
+     if ( ax == 1.0d0 ) then
+        call convert_xyz2aa( MI, aa, asi )
+        rsi=matmul( aa, asi )
+     else
+        rsi=asi
+     end if
+  else
+     rsi=matmul( aa,asi )
+  end if
 
   ML1=1.d0
   ML2=1.d0

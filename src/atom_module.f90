@@ -2,6 +2,7 @@ MODULE atom_module
 
   use lattice_module, only: lattice, read_lattice, get_inverse_lattice &
                            ,get_aa_lattice
+  use cif_format_module
 
   implicit none
 
@@ -61,6 +62,11 @@ CONTAINS
 10     continue
 
        if ( iformat == 0 ) then
+          call check_cif_format( unit, ierr )
+          if ( ierr == 0 ) iformat=4
+       end if
+
+       if ( iformat == 0 ) then
           rewind unit
           idummy(:)=0
           read(unit,'(a)') line            ! Couting the number of
@@ -87,6 +93,12 @@ CONTAINS
        call read_atom_rsdft( rank, unit )
     case( 3 )
        call read_atom_xyz( rank, unit )
+    case( 4 )
+       call read_atom_cif &
+            ( rank, unit, aa_obj, aa_atom, ki_atom, md_atom, zn_atom )
+       iformat=1
+       Natom=size(ki_atom)
+       Nelement=maxval(ki_atom)
     end select
 
     iformat_org = iformat
@@ -202,30 +214,6 @@ CONTAINS
 
   END SUBROUTINE read_atom_xyz
 
-  SUBROUTINE get_atomic_number( element_name, Z )
-    implicit none
-    character(2),intent(IN) :: element_name
-    integer,intent(OUT) :: Z
-    character(2) :: ckey
-    call convert_capital( element_name, ckey )
-    select case( ckey )
-    case( "H" )
-       Z=1
-    case( "C" )
-       Z=6
-    case( "N" )
-       Z=7
-    case( "O" )
-       Z=8
-    case( "AL" )
-       Z=13
-    case( "SI" )
-       Z=14
-    case default
-       write(*,*) element_name//" is undefined!!!"
-       stop "stop@get_atomic_number"
-    end select
-  END SUBROUTINE get_atomic_number
 
   SUBROUTINE write_read_atom_data( ki_atom, aa_atom, md_atom )
     implicit none

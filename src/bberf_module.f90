@@ -2,6 +2,7 @@ MODULE bberf_module ! error function
 
   PRIVATE
   PUBLIC :: bberf
+  PUBLIC :: bberfc
 
 CONTAINS
 
@@ -13,9 +14,24 @@ CONTAINS
     implicit none
     real(8) :: bberf
     real(8),intent(IN) :: x
-    bberf = erf(x)
-!   bberf=1.0d0-ccerf(x) ! if buil-in erf is not avaialbe
+#ifdef _NO_ERF_
+    bberf=1.0d0-ccerf(x) ! if buil-in erf is not avaialbe
+#else
+    bberf=erf(x)
+#endif
   END FUNCTION bberf
+
+
+  FUNCTION bberfc( x )
+    implicit none
+    real(8) :: bberfc
+    real(8),intent(IN) :: x
+#ifdef _NO_ERF_
+    bberfc=ccerf(x) ! if buil-in erfc is not avaialbe
+#else
+    bberfc=erfc(x)
+#endif
+  END FUNCTION bberfc
 
 
   FUNCTION ccerf( x )
@@ -26,6 +42,12 @@ CONTAINS
     real(8) :: y,alpha,tny,eps,delta
     real(8) :: ai,bi,f0,f1,C0,C1,D0,D1,a0
     integer :: nmax,i
+
+    if ( abs(x) < 0.1d0 ) then
+       ccerf=1.0d0-2.0d0/sqrt(pi)*(x-x**3/3.0d0+0.1d0*x**5 &
+                  -x**7/42.0d0+x**9/216.0d0-x**11/1320.0d0 )
+       return
+    end if
 
     nmax  = 100000
     eps   = epsilon(1.0d0)
@@ -57,7 +79,7 @@ CONTAINS
        a0 = 0.0d0
     end do
 
-    ccerf = f1*exp(-y)*sqrt(y/pi)
+    ccerf = sign( f1*exp(-y)*sqrt(y/pi), x ) + 1.0d0-sign(1.0d0,x)
 
   END FUNCTION ccerf
 

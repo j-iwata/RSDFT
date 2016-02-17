@@ -256,13 +256,13 @@ CONTAINS
     integer,intent(IN) :: g
     type(ps1d),intent(INOUT) :: psp
     integer,parameter :: max_loop=1000000, max_array_size = 8
-    integer :: loop,i,j,k,l
+    integer :: loop,i,j,k,l,ir,ic,nr
     integer,allocatable :: lo(:),no(:)
     character(100) :: cbuf, ckey
-    integer :: norb,nrr,nsize,ltmp
+    integer :: norb,nrr,nsize,ltmp,columns
     real(8) :: tmp,Zps
     real(8),allocatable :: rr(:),rx(:),vql(:),cdc(:),cdd(:)
-    real(8),allocatable :: viod(:,:),anorm(:),Dij(:,:)
+    real(8),allocatable :: viod(:,:),anorm(:),Dij(:,:),work(:)
 
     write(*,'(a40," ps_read_upf_ver201")') repeat("-",40)
 
@@ -422,9 +422,24 @@ CONTAINS
              ckey = adjustl( cbuf )
 
              if ( ckey(1:8) == "<PP_DIJ " ) then
+                write(*,*) ckey(1:8)
                 call get_num_from_string( cbuf, "size=", nsize )
-                write(*,*) "nsize=",nsize
-                read(g,*) Dij(1:norb,1:norb)
+                call get_num_from_string( cbuf, "columns=", columns )
+                write(*,*) "nsize,columns=",nsize,columns
+! ---
+                allocate( work(nsize) ) ; work=0.0d0
+                nr=nsize/columns
+                do ir=1,nr
+                   read(g,*) work((ir-1)*columns+1:ir*columns)
+                end do
+                if ( nr*columns < nsize ) read(g,*) work(nr*columns+1:nsize)
+                do ic=1,norb
+                   do ir=1,norb
+                      Dij(ir,ic) = work(ir+(ic-1)*norb)
+                   end do
+                end do
+                deallocate( work )
+! ---
                 j=count( Dij /= 0.0d0 )
                 k=0 !------> check single or multi reference
                 do l=1,norb
@@ -500,8 +515,9 @@ CONTAINS
        end do
     end do
 
-    if ( any( psp%anorm /= 0.0d0 ) ) then !------> single reference
+    if ( any( anorm /= 0.0d0 ) ) then !------> single reference
        do j=1,norb
+          psp%anorm(j)=anorm(j)
           psp%inorm(j)=1
           if ( psp%anorm(j) < 0.0d0 ) psp%inorm(j)=-1
           tmp = sqrt( abs( psp%anorm(j) ) )

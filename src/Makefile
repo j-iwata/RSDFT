@@ -10,6 +10,7 @@ EXTOBJ0 = $(DIR0)/dotp.o \
           $(DIR0)/convert_capital.o \
           $(DIR0)/write_info.o \
           $(DIR0)/stop_program.o \
+          $(DIR0)/get_atomic_number.o \
 
 DIR1 = ext1
 EXTOBJ1 = $(DIR1)/ext_sub_minpac.o

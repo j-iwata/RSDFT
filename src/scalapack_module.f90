@@ -98,7 +98,7 @@ CONTAINS
     implicit none
     integer :: itmp(2)
     itmp(:)=-1
-    call IOTools_readIntegerKeywords( "SCL", itmp )
+    call IOTools_readIntegerKeyword( "SCL", itmp )
     if ( itmp(1) > -1 ) NPROW=itmp(1)
     if ( itmp(2) > -1 ) NPCOL=itmp(2)
   END SUBROUTINE read_scalapack

@@ -1,3 +1,7 @@
+RSDFT ( ver.1.1.0 )
+  Bug fix: reading UPF pseudopotential
+  doc/UserGuide*.pdf are updated
+
 RSDFT ( ver.1.0.3 )
   Bug fix: reading xyz-format in atom_module
 

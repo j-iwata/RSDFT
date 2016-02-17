@@ -12,7 +12,7 @@ PROGRAM cubegen_wf
   complex(8),allocatable :: ztmp(:)
 
   integer :: MB,MB1,MB2
-  integer :: MBZ,MSP
+  integer :: MBZ,MSP,itmp(6)
   integer :: ndata, iflag_abs
   integer,allocatable :: idata(:,:)
   logical :: flag_real8
@@ -70,15 +70,26 @@ PROGRAM cubegen_wf
 ! ---
 
   open(u1,file=file_name,status='old',form='unformatted')
-
-  read(u1) ML,ML1,ML2,ML3
-  read(u1) MB,MB1,MB2
+  read(u1) i
+  if ( i <= 0 ) then
+     write(*,*) "--- new format ---"
+     read(u1) ML,ML1,ML2,ML3
+     read(u1) MB,MB1,MB2
+     read(u1) itmp(1:3)
+     read(u1) itmp(4:6)
+  else
+     rewind u1
+     read(u1) ML,ML1,ML2,ML3
+     read(u1) MB,MB1,MB2
+  end if
 
   allocate( LL(3,ML)        ) ; LL=0.0d0
   allocate( occ(MB,MBZ,MSP) ) ; occ=0.0d0
 
   read(u1) LL
   read(u1) occ
+
+  if ( i <=0 ) read(u1)
 
   write(*,*) "ML=",ML
   write(*,*) "ML1,ML2,ML3=",ML1,ML2,ML3
@@ -99,6 +110,8 @@ PROGRAM cubegen_wf
   do k=1,MBZ
   do n=MB1,MB2
 
+     write(*,*) n,k,s
+
      if ( flag_real8 ) then
         read(u1) rtmp
      else
@@ -109,6 +122,7 @@ PROGRAM cubegen_wf
         if ( idata(1,i) == n .and. &
              idata(2,i) == k .and. &
              idata(3,i) == s ) then
+           write(*,*) i
            call gen_cube(n,k,s)
         end if
      end do

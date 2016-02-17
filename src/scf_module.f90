@@ -65,7 +65,7 @@ CONTAINS
     call IOTools_readReal8Keyword( "ETOTCONV", etot_conv )
     call IOTools_readIntegerKeyword( "DITER", Diter_scf )
     itmp=-1
-    call IOTools_readIntegerKeywords( "NDIAG", itmp )
+    call IOTools_readIntegerKeyword( "NDIAG", itmp )
     if ( itmp(1) > 0 ) Ndiag=itmp(1)
     if ( itmp(2) > 0 ) second_diag=itmp(2)
   END SUBROUTINE read_scf

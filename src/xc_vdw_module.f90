@@ -35,6 +35,8 @@ MODULE xc_vdw_module
   logical :: flag_init=.false.
   real(8) :: Ex_LDA, Ec_LDA, Ec_vdw
 
+  integer,parameter :: unit_phig=9
+
   include 'mpif.h'
 
 CONTAINS
@@ -43,10 +45,11 @@ CONTAINS
   SUBROUTINE init_xc_vdw
     implicit none
     integer :: i,j,n,np,info
+    logical :: file_exist
 
     if ( flag_init ) return
 
-    call write_border( 1, " init_xc_vdw(start)" )
+    call write_border( 0, " init_xc_vdw(start)" )
 
     SizeQgrid = Qmax / NumQgrid
     allocate( Qgrid(0:NumQgrid) ) ; Qgrid=0.0d0
@@ -57,32 +60,90 @@ CONTAINS
     allocate( phiG(NMGL,0:NumQgrid,0:NumQgrid) )
     phiG=0.0d0
 
-    np=( NumQgrid*(NumQgrid+1) )/2
-    n=0
-    do j=1,NumQgrid
-    do i=j,NumQgrid
+    call read_file_phiG( file_exist )
 
-       n = n + 1
-       if ( np-1 < myrank .or. mod(n-1,nprocs) /= myrank ) cycle
+    if ( .not.file_exist ) then
 
-       call calc_phiG( Qgrid(i), Qgrid(j), phiG(1,i,j) )
+       np=( NumQgrid*(NumQgrid+1) )/2
+       n=0
+       do j=1,NumQgrid
+       do i=j,NumQgrid
 
-       if ( i /= j ) phiG(:,j,i) = phiG(:,i,j)
+          n = n + 1
+          if ( np-1 < myrank .or. mod(n-1,nprocs) /= myrank ) cycle
 
-    end do ! i
-    end do ! j
+          call calc_phiG( Qgrid(i), Qgrid(j), phiG(1,i,j) )
 
-    call MPI_ALLREDUCE( MPI_IN_PLACE, phiG, size(phiG), MPI_REAL8 &
-         ,MPI_SUM, MPI_COMM_WORLD, info )
+          if ( i /= j ) phiG(:,j,i) = phiG(:,i,j)
+
+       end do ! i
+       end do ! j
+
+       call MPI_ALLREDUCE( MPI_IN_PLACE, phiG, size(phiG), MPI_REAL8 &
+            ,MPI_SUM, MPI_COMM_WORLD, info )
+
+       call write_file_phiG
+
+    end if
 
     call init1_xc_vdw ! coefficients of 3rd spline
 
     flag_init = .true.
 
-    call write_border( 1, " init_xc_vdw(end)")
+    call write_border( 0, " init_xc_vdw(end)")
 
   END SUBROUTINE init_xc_vdw
 
+  SUBROUTINE read_file_phiG( flag )
+    implicit none
+    logical,intent(OUT) :: flag
+    integer :: i,j,k,m,n
+    flag=.false.
+    if ( myrank == 0 ) then
+       inquire( file="xc_vdw_phig.dat", exist=flag )
+       if ( flag ) then
+          open(unit_phig,file="xc_vdw_phig.dat",status="old")
+          read(unit_phig,*) m,n
+          if ( m == NMGL .and. n == NumQgrid ) then
+             write(*,*) "phiG is read from 'xc_vdw_phig.dat'"
+             do k=1,n
+             do j=k,n
+                do i=1,m
+                   read(unit_phig,*) phiG(i,j,k)
+                end do
+                if ( j /= k ) phiG(:,k,j)=phiG(:,j,k)
+             end do ! j
+             end do ! k
+          else
+             flag=.false.
+          end if
+          close(unit_phig)
+       end if
+    end if
+    call MPI_BCAST( flag, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, i )
+    if ( flag ) then
+       call MPI_ALLREDUCE( MPI_IN_PLACE, phiG, size(phiG), MPI_REAL8 &
+            ,MPI_SUM, MPI_COMM_WORLD, i )
+    end if
+  END SUBROUTINE read_file_phiG
+
+  SUBROUTINE write_file_phiG
+    implicit none
+    integer :: i,j,k
+    if ( myrank == 0 ) then
+       write(*,*) "phiG is written to 'xc_vdw_phig.dat'"
+       open(unit_phig,file="xc_vdw_phig.dat")
+       write(unit_phig,*) NMGL, NumQgrid
+       do k=1,NumQgrid
+       do j=k,NumQgrid
+          do i=1,NMGL
+             write(unit_phig,*) phiG(i,j,k)
+          end do
+       end do ! j
+       end do ! k
+       close(unit_phig)
+    end if
+  END SUBROUTINE write_file_phiG
 
   SUBROUTINE calc_phiG( qi, qj, phiG )
     implicit none
