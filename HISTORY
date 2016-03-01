@@ -1,3 +1,8 @@
+RSDFT ( ver.1.2.0 )
+  Bug fix: Nonlocal-pseudopotential operations with OpenMP
+  cpp flag "-D_NO_ERF_" : When the built-in error function is unavailable
+  Intentioal stop of the program :  When a file "exit" or "EXIT" is found, the program stops
+
 RSDFT ( ver.1.1.0 )
   Bug fix: reading UPF pseudopotential
   doc/UserGuide*.pdf are updated

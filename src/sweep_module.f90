@@ -61,10 +61,12 @@ CONTAINS
     integer,optional,intent(IN)  :: Diter_in
     character(*),optional,intent(IN) :: outer_loop_info
     integer :: iter,s,k,n,m,iflag_hybrid,ierr,Diter
-    logical :: flag_exit, flag_end, flag_conv
+    logical :: flag_exit, flag_conv
+    logical :: flag_end, flag_end1, flag_end2
     character(40) :: chr_iter
     character(22) :: add_info
     type(time) :: etime
+    logical,external :: exit_program
 
     Diter = 0
     if ( present(Diter_in) ) then
@@ -166,7 +168,9 @@ CONTAINS
        call calc_with_rhoIN_total_energy( Echk )
 
        call conv_check( iter, flag_conv )
-       call global_watch( .false., flag_end )
+       call global_watch( .false., flag_end1 )
+       flag_end2 = exit_program()
+       flag_end  = ( flag_end1 .or. flag_end2 )
        flag_exit = (flag_end.or.flag_conv.or.(iter==Diter))
 
        if ( disp_switch ) call write_info_sweep
@@ -189,8 +193,14 @@ CONTAINS
 
     ierr_out = iter
 
-    if ( flag_end ) then
+    if ( flag_end1 ) then
        ierr_out = -1
+       if ( myrank == 0 ) write(*,*) "flag_end=",flag_end
+       return
+    end if
+
+    if ( flag_end2 ) then
+       ierr_out = -3
        if ( myrank == 0 ) write(*,*) "flag_end=",flag_end
        return
     end if

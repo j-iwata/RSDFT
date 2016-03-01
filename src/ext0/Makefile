@@ -1,6 +1,7 @@
 include ../make.inc
 
-OBJ = dotp.o convert_capital.o write_info.o stop_program.o get_atomic_number.o
+OBJ = dotp.o convert_capital.o write_info.o stop_program.o get_atomic_number.o\
+      exit_program.o
 
 all : $(OBJ)
 

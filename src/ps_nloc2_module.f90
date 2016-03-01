@@ -46,6 +46,10 @@ MODULE ps_nloc2_module
 
   type(gaunt) :: yyy
 
+  INTERFACE sort_index_sub
+     MODULE PROCEDURE d_sort_index_sub, z_sort_index_sub
+  END INTERFACE
+
 CONTAINS
 
 
@@ -916,6 +920,8 @@ CONTAINS
 
     call prep_uvk_ps_nloc2(MBZ_0,MBZ_1,kbb(1,MBZ_0))
 
+    call sort_index_sub( MJJ, JJP, uVk )
+
     call watcha( timer_counter )
 
     call init_op_ps_nloc2_hp(.true.)
@@ -931,6 +937,70 @@ CONTAINS
     call write_border( 0, " prep_ps_nloc2(end)" )
 
   END SUBROUTINE prep_ps_nloc2
+
+
+  SUBROUTINE d_sort_index_sub( mj, jj, vj )
+    implicit none
+    integer,intent(IN) :: mj(:)
+    integer,intent(INOUT) :: jj(:,:)
+    real(8),intent(INOUT) :: vj(:,:,:)
+    real(8),allocatable :: a(:)
+    integer,allocatable :: indx(:)
+    integer :: m1,m2,n,i1,i2,i3
+    m1=size( jj, 1 )
+    m2=size( jj, 2 )
+    allocate( a(m1)    ) ; a=0.0d0
+    allocate( indx(m1) ) ; indx=0
+    do i2=1,m2
+       n=mj(i2)
+       a(1:n)=jj(1:n,i2)
+       call indexx( n, a, indx )
+       do i1=1,n
+          jj(i1,i2)=nint( a(indx(i1)) )
+       end do
+       do i3=1,size(vj,3)
+          a(1:n)=vj(1:n,i2,i3)
+          do i1=1,n
+             vj(i1,i2,i3)=a( indx(i1) )
+          end do
+       end do
+    end do
+    deallocate( indx )
+    deallocate( a )
+  END SUBROUTINE d_sort_index_sub
+
+  SUBROUTINE z_sort_index_sub( mj, jj, vj )
+    implicit none
+    integer,intent(IN) :: mj(:)
+    integer,intent(INOUT) :: jj(:,:)
+    complex(8),intent(INOUT) :: vj(:,:,:)
+    complex(8),allocatable :: v(:)
+    real(8),allocatable :: a(:)
+    integer,allocatable :: indx(:)
+    integer :: m1,m2,n,i1,i2,i3
+    m1=size( jj, 1 )
+    m2=size( jj, 2 )
+    allocate( v(m1) ) ; v=(0.0d0,0.0d0)
+    allocate( a(m1) ) ; a=0.0d0
+    allocate( indx(m1) ) ; indx=0
+    do i2=1,m2
+       n=mj(i2)
+       a(1:n)=jj(1:n,i2)
+       call indexx( n, a, indx )
+       do i1=1,n
+          jj(i1,i2)=nint( a(indx(i1)) )
+       end do
+       do i3=1,size(vj,3)
+          v(1:n)=vj(1:n,i2,i3)
+          do i1=1,n
+             vj(i1,i2,i3)=v( indx(i1) )
+          end do
+       end do
+    end do
+    deallocate( indx )
+    deallocate( a )
+    deallocate( v )
+  END SUBROUTINE z_sort_index_sub
 
 
   SUBROUTINE prepMapsTmp(np1,np2,np3,nprocs_g_,itmp,icheck_tmp1,icheck_tmp2)

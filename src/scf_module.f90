@@ -82,7 +82,8 @@ CONTAINS
     real(8),optional,intent(OUT) :: Etot_out
     integer :: iter,s,k,n,m,ierr,idiag,i,Diter
     integer :: ML01,MSP01,ib1,ib2,iflag_hybrid,iflag_hybrid_0
-    logical :: flag_exit,flag_end,flag_conv,flag_conv_f,flag_conv_e
+    logical :: flag_exit,flag_conv,flag_conv_f,flag_conv_e
+    logical :: flag_end, flag_end1, flag_end2
     real(8),allocatable :: v(:,:)
     real(8) :: tol_force
     character(40) :: chr_iter
@@ -91,6 +92,7 @@ CONTAINS
     logical :: flag_recalc_esp = .false.
     real(8) :: Etot, Ehwf, diff_etot
     real(8) :: Ntot(4), sqerr_out(4)
+    logical,external :: exit_program
 
     call write_border( 0, "" )
     call write_border( 0, " SCF START -----------" )
@@ -369,7 +371,11 @@ CONTAINS
 
        call write_esp_wf
 
-       call global_watch(.false.,flag_end)
+       call global_watch( .false., flag_end1 )
+
+       flag_end2 = exit_program()
+
+       flag_end = ( flag_end1 .or. flag_end2 )
 
        flag_exit = (flag_conv.or.flag_end.or.(iter==Diter))
 
@@ -405,8 +411,10 @@ CONTAINS
        ierr_out = iter
     end if
 
-    if ( flag_end ) then
+    if ( flag_end1 ) then
        ierr_out = -1
+    else if ( flag_end2 ) then
+       ierr_out = -3
     else
        call gather_wf
     end if
@@ -422,6 +430,8 @@ CONTAINS
           write(*,*) "Exit SCF loop due to the time limit"
        else if ( ierr_out == -2 ) then
           write(*,'(1x,"scf not converged !!!")')
+       else if ( ierr_out == -3 ) then
+          write(*,*) "'EXIT' file was found"
        end if
        write(*,'(1x,"Total SCF time :",f10.3,"(rank0)",f10.3,"(min)" &
                ,f10.3,"(max)")') etime_tot%t0, etime_tot%tmin, etime_tot%tmax
