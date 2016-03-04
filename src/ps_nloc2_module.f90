@@ -1605,37 +1605,37 @@ CONTAINS
        if ( occ(n,k,s) == 0.d0 ) cycle
        c=-2.d0*occ(n,k,s)*dV*dV
        do lma=1,nzlma
-          if ( MJJ_MAP(lma) == MJJ(lma) ) then
-#ifdef _DRSDFT_
-          do j=1,MJJ(lma)
-             i=JJP(j,lma)
-             wtmp5(0,lma,n,k,s)=wtmp5(0,lma,n,k,s) &
-                  +uVk(j,lma,k)*unk(i,n,k,s)
-             wtmp5(1,lma,n,k,s)=wtmp5(1,lma,n,k,s)+duVdR(1,j,lma)*unk(i,n,k,s)
-             wtmp5(2,lma,n,k,s)=wtmp5(2,lma,n,k,s)+duVdR(2,j,lma)*unk(i,n,k,s)
-             wtmp5(3,lma,n,k,s)=wtmp5(3,lma,n,k,s)+duVdR(3,j,lma)*unk(i,n,k,s)
-          end do
-          wtmp5(0,lma,n,k,s)=iuV(lma)*c*wtmp5(0,lma,n,k,s)
-#else
-          do j=1,MJJ(lma)
-             i=JJP(j,lma)
-             wtmp5(0,lma,n,k,s)=wtmp5(0,lma,n,k,s) &
-                  +uVk(j,lma,k)*conjg(unk(i,n,k,s))
-          end do
-          wtmp5(0,lma,n,k,s)=iuV(lma)*c*wtmp5(0,lma,n,k,s)
-          do j=1,MJJ_MAP(lma)
-             i=JJP(j,lma)
-             d1=c1*JJ_MAP(1,j,lma)+JJ_MAP(4,j,lma)
-             d2=c2*JJ_MAP(2,j,lma)+JJ_MAP(5,j,lma)
-             d3=c3*JJ_MAP(3,j,lma)+JJ_MAP(6,j,lma)
-             kr=pi2*(kbb(1,k)*d1+kbb(2,k)*d2+kbb(3,k)*d3)
-             ztmp=dcmplx(cos(kr),sin(kr))*unk(i,n,k,s)
-             wtmp5(1,lma,n,k,s)=wtmp5(1,lma,n,k,s)+duVdR(1,j,lma)*ztmp
-             wtmp5(2,lma,n,k,s)=wtmp5(2,lma,n,k,s)+duVdR(2,j,lma)*ztmp
-             wtmp5(3,lma,n,k,s)=wtmp5(3,lma,n,k,s)+duVdR(3,j,lma)*ztmp
-          end do
-#endif
-          else ! --- MJJ(lma) /= MJJ_MAP(lma) ---
+!          if ( MJJ_MAP(lma) == MJJ(lma) ) then
+!#ifdef _DRSDFT_
+!          do j=1,MJJ(lma)
+!             i=JJP(j,lma)
+!             wtmp5(0,lma,n,k,s)=wtmp5(0,lma,n,k,s) &
+!                  +uVk(j,lma,k)*unk(i,n,k,s)
+!             wtmp5(1,lma,n,k,s)=wtmp5(1,lma,n,k,s)+duVdR(1,j,lma)*unk(i,n,k,s)
+!             wtmp5(2,lma,n,k,s)=wtmp5(2,lma,n,k,s)+duVdR(2,j,lma)*unk(i,n,k,s)
+!             wtmp5(3,lma,n,k,s)=wtmp5(3,lma,n,k,s)+duVdR(3,j,lma)*unk(i,n,k,s)
+!          end do
+!          wtmp5(0,lma,n,k,s)=iuV(lma)*c*wtmp5(0,lma,n,k,s)
+!#else
+!          do j=1,MJJ(lma)
+!             i=JJP(j,lma)
+!             wtmp5(0,lma,n,k,s)=wtmp5(0,lma,n,k,s) &
+!                  +uVk(j,lma,k)*conjg(unk(i,n,k,s))
+!          end do
+!          wtmp5(0,lma,n,k,s)=iuV(lma)*c*wtmp5(0,lma,n,k,s)
+!          do j=1,MJJ_MAP(lma)
+!             i=JJP(j,lma)
+!             d1=c1*JJ_MAP(1,j,lma)+JJ_MAP(4,j,lma)
+!             d2=c2*JJ_MAP(2,j,lma)+JJ_MAP(5,j,lma)
+!             d3=c3*JJ_MAP(3,j,lma)+JJ_MAP(6,j,lma)
+!             kr=pi2*(kbb(1,k)*d1+kbb(2,k)*d2+kbb(3,k)*d3)
+!             ztmp=dcmplx(cos(kr),sin(kr))*unk(i,n,k,s)
+!             wtmp5(1,lma,n,k,s)=wtmp5(1,lma,n,k,s)+duVdR(1,j,lma)*ztmp
+!             wtmp5(2,lma,n,k,s)=wtmp5(2,lma,n,k,s)+duVdR(2,j,lma)*ztmp
+!             wtmp5(3,lma,n,k,s)=wtmp5(3,lma,n,k,s)+duVdR(3,j,lma)*ztmp
+!          end do
+!#endif
+!          else ! --- MJJ(lma) /= MJJ_MAP(lma) ---
 #ifdef _DRSDFT_
           do j=1,MJJ(lma)
              i=JJP(j,lma)
@@ -1674,7 +1674,7 @@ CONTAINS
              wtmp5(3,lma,n,k,s)=wtmp5(3,lma,n,k,s)+duVdR(3,j,lma)*ztmp
           end do
 #endif
-          end if
+!          end if
        end do ! lma
     end do ! n
 !$OMP end do

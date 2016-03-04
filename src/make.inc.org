@@ -38,6 +38,8 @@ OMPFLAG   =
 #CPP_FLAGS := -D_FFTW_ $(CPP_FLAGS)
 #INCLUDE_DIR := -I/home/iwata/fftw-3.3.4/include/ $(INCLUDE_DIR)
 #FFTW_L = -L/home/iwata/fftw-3.3.4/lib/ -lfftw3_mpi -lfftw3 -lm
+########################################################### Others #####
+#CPP_FLAGS := -D_NO_ERF_ $(CPP_FLAGS)
 ########################################################################
 ################################################# compiler & options ###
 ########################################################################
@@ -57,6 +59,11 @@ OMPFLAG   =
            -lmkl_intel_lp64 -lmkl_sequential -lmkl_core
 #LAPACK_L = -lm /Users/lhan/.homebrew/opt/scalapack/lib/libscalapack.dylib -lblas
 ########################################################################
+##### INTEL(2)                                                     #####
+#FC = mpiifort
+#FFLAGS0 = -cpp
+#LAPACK_L = -mkl=cluster
+########################################################################
 ##### PGF                                                          #####
 #FFLAGS0 = -Mpreprocess -O3
 #FFLAGS0 = -Mpreprocess -fastsse
@@ -75,6 +82,8 @@ OMPFLAG   =
         -X9 -V -Ec -Qa,d,i,p,t,x -Cpp -Ccpp
 #LFLAGS0 = ${FFLAGS0} -Ntl_trt
 #LAPACK_L = -SSL2BLAMP -SCALAPACK
+#INCLUDE_DIR = -I../ -I/home/apps/fftw/3.3.3/include/
+#FFTW_L = -L/home/apps/fftw/3.3.3/lib64 -lfftw3_mpi -lfftw3 -lm
 ########################################################################
 ########################################################################
 ########################################################################

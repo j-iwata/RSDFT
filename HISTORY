@@ -1,3 +1,6 @@
+RSDFT ( ver.1.2.1 )
+  Bug fix: Nonlocal-pseudopotential force
+
 RSDFT ( ver.1.2.0 )
   Bug fix: Nonlocal-pseudopotential operations with OpenMP
   cpp flag "-D_NO_ERF_" : When the built-in error function is unavailable

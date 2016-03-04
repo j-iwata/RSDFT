@@ -1,4 +1,4 @@
-# RSDFT ( ver.1.2.0 )
+# RSDFT ( ver.1.2.1 )
 
 Real-space finite-difference pseudopotential density-functional-theory code for first-principles material simulations on massively-parallel computers
 
@@ -24,6 +24,18 @@ utility/	Utility programs
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+# REFERENCES
+
+"A massively-parallel electronic-structure calculations based on real-space density functional theory"  
+Jun-Ichi Iwata, Daisuke Takahashi, Atsushi Oshiyama, Taisuke Boku, Kenji Shiraishi, Susumu Okada, Kazuhiro Yabana  
+Journal of Computational Physics 229, pp2339-2363 (2010).  
+
+
+"Performace evaluation of ultra-large-scale first-principles electronic structure calculation code on the K computer"  
+Yukihiro Hasegawa, Jun-Ichi Iwata, Miwako Tsuji, Daisuke Takahashi, Atsushi Oshiyama, Kazuo Minami, Taisuke Boku, Hikaru Inoue, Yoshito Kitazawa, Ikuo Miyoshi, Mitsuo Yokokawa  
+Internationa Journal of High Performance Computing Applications 28, pp335-355, (2014).  
+
 
 # ACKNOWLEDGEMENT
 
