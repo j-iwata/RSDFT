@@ -45,7 +45,7 @@ CONTAINS
 !    character(10) :: time
 
     write(unit,'(a70)') repeat("-",70)
-    write(unit,*) "RSDFT ver.1.2.1"
+    write(unit,*) "RSDFT ver.1.2.2"
 
     write(unit,'(a60," header_info")') repeat("-",60)
 

@@ -5,9 +5,10 @@ PROGRAM dos_simple
   integer,parameter :: u5=5, u99=99, u10=10
   integer,parameter :: max_loop=10000000
   integer :: mbv,mbc,ne,nbk,natom,ie,mb,msp,s
-  integer :: func_type
+  integer :: func_type, n_MP
   real(8),parameter :: HT=27.2116d0
   real(8),allocatable :: eval(:,:,:),occp(:,:,:)
+  real(8),allocatable :: factor(:)
   real(8) :: gamma,evb,ecb,e1,e2,e,de,emin,emax,f(2),c1,c2
 
   natom = 0
@@ -76,13 +77,19 @@ PROGRAM dos_simple
   write(*,*) "energy range: e1,e2= ( 0,0: default values are set )"
   read(u5,*) e1,e2
   write(*,*) e1,e2
-  write(*,*) "func type [0:gaussian, 1:Lorentzian]"
+  write(*,*) "func type [0:gaussian, 1:Lorentzian, 2:Methfessel-Paxton]"
   read(u5,*) func_type
-  if ( func_type < 0 .or. 1 < func_type ) then
+  if ( func_type < 0 .or. 2 < func_type ) then
      func_type = 0
      write(*,*) "func_type is replaced to ",func_type
   end if
   write(*,*) func_type
+  if ( func_type == 2 ) then
+     write(*,*) "Order of MP =?"
+     read(u5,*) n_MP
+     write(*,*) n_MP
+     call init_gg0( n_MP )
+  end if
 
   if ( ne <= 0 .or. e1 >= e2 ) then
      ne = 2000
@@ -111,6 +118,10 @@ PROGRAM dos_simple
      case( 1 )
         do s=1,msp
            call dos1(s,e,f(s))
+        end do
+     case( 2 )
+        do s=1,msp
+           call dos2(s,e,f(s),n_MP)
         end do
      end select
 
@@ -231,6 +242,62 @@ CONTAINS
     stop "The format of fort.99 is strange"
 
   END SUBROUTINE read_from_fort99
+
+  SUBROUTINE dos2(s,e,f,N_MP)
+    implicit none
+    integer,intent(IN)  :: s
+    real(8),intent(IN)  :: e
+    real(8),intent(OUT) :: f
+    integer,intent(IN)  :: N_MP
+    real(8) :: c,x
+    integer :: i,k
+
+    f=0.0d0
+    do k=1,nbk
+       do i=1,mb
+
+          x=e-eval(i,k,s)
+          c=occp(i,k,s)/gamma
+          f=f+c*gg0(N_MP,x/gamma)
+
+       end do
+    end do
+
+  END SUBROUTINE dos2
+
+  FUNCTION gg0(n,x)
+    implicit none
+    integer :: n,i
+    real(8) :: x,gg,gg0,hp0,hp1,hp2,hp3
+    gg0 = factor(0)*exp(-x*x)
+    if ( n <= 0 ) return
+    hp0 = 1.0d0
+    hp1 = 2.0d0*x
+    gg  = 0.0d0
+    do i=1,n
+       hp2 = 2.d0*x*hp1 - 2.d0*(2*i-1)*hp0
+       hp3 = 2.d0*x*hp2 - 2.d0*(2*i  )*hp1
+       gg  = gg + factor(i)*hp2
+       hp0 = hp2
+       hp1 = hp3
+    end do
+    gg0 = gg0 + gg*exp(-x*x)
+    return
+  END FUNCTION gg0
+
+  SUBROUTINE init_gg0( nmax )
+    implicit none
+    integer,intent(IN) :: nmax
+    integer :: n
+    allocate( factor(0:nmax) ) ; factor=0.0d0
+    factor(0)= 1.0d0/sqrt(acos(-1.0d0))
+    if ( nmax == 0 ) return
+    factor(1)=-1.0d0/(4.0d0*sqrt(acos(-1.0d0)))
+    do n=2,nmax
+       factor(n)=-factor(n-1)/(4.0d0*n)
+    end do
+  END SUBROUTINE init_gg0
+
 
 
 END PROGRAM dos_simple

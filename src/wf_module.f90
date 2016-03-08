@@ -14,6 +14,7 @@ MODULE wf_module
            ,hunk, read_wf, iflag_hunk, workwf &
            ,allocate_work_wf, deallocate_work_wf
   PUBLIC :: write_esp_wf
+  PUBLIC :: write_info_esp_wf
   PUBLIC :: wfrange
   PUBLIC :: allocate_b_wf, allocate_b_occ
 
@@ -355,6 +356,28 @@ CONTAINS
     end do
     end do
   END SUBROUTINE write_esp_wf
+
+
+  SUBROUTINE write_info_esp_wf( control )
+    implicit none
+    integer,intent(IN) :: control
+    integer :: s,k,n
+    integer,parameter :: u=99
+    call write_border( 1, " write_info_esp_wf(start)" )
+    if ( control > 0 ) then
+       if ( control == 2 ) rewind u
+       write(u,*) "Eigenvalues"
+       write(u,'(a4,a6,a20,2a13,1x)') &
+            "k","n","esp(n,k,s)","esp_err  ","occ(n,k,s)  "
+       do k=1,MK_WF
+       do n=1,MB_WF
+          write(u,'(i4,i6,2(f20.15,2g13.5,1x))') k,n &
+               ,(esp(n,k,s),esp(n,k,s)-esp0(n,k,s),occ(n,k,s),s=1,MS_WF)
+       end do
+       end do
+    end if
+    call write_border( 1, " write_info_esp_wf(end)" )
+  END SUBROUTINE write_info_esp_wf
 
 
   SUBROUTINE allocate_b_wf( b, wf )

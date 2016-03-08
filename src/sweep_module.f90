@@ -50,6 +50,8 @@ CONTAINS
        tol_Echk = tol_in
     case( 2 )
        tol_esp = tol_in
+    case( 3 )
+       tol_esp = tol_in
     end select
   END SUBROUTINE init_sweep
 
@@ -167,7 +169,7 @@ CONTAINS
 
        call calc_with_rhoIN_total_energy( Echk )
 
-       call conv_check( iter, flag_conv )
+       call conv_check( iter, res, flag_conv )
        call global_watch( .false., flag_end1 )
        flag_end2 = exit_program()
        flag_end  = ( flag_end1 .or. flag_end2 )
@@ -188,6 +190,8 @@ CONTAINS
        if ( flag_exit ) exit
 
     end do ! iter
+
+    if ( myrank == 0 ) call write_info_esp_wf( 2 )
 
     deallocate( esp0 )
 
@@ -218,9 +222,10 @@ CONTAINS
   END SUBROUTINE calc_sweep
 
 
-  SUBROUTINE conv_check( iter, flag_conv )
+  SUBROUTINE conv_check( iter, res, flag_conv )
     implicit none
     integer,intent(IN)  :: iter
+    real(8),intent(INOUT) :: res(:,:,:)
     logical,intent(OUT) :: flag_conv
     call write_border( 1, " conv_check(start)" )
     select case( iconv_check )
@@ -228,6 +233,8 @@ CONTAINS
          call conv_check_1( iter, flag_conv )
     case( 2 )
          call conv_check_2( flag_conv )
+    case( 3 )
+         call conv_check_3( res, flag_conv )
     end select
     call write_border( 1, " conv_check(end)" )
   END SUBROUTINE conv_check
@@ -252,6 +259,20 @@ CONTAINS
     flag_conv = .false.
     if ( max_esperr < tol_esp ) flag_conv = .true.
   END SUBROUTINE conv_check_2
+
+  SUBROUTINE conv_check_3( res, flag_conv )
+    implicit none
+    real(8),intent(OUT) :: res(:,:,:)
+    logical,intent(OUT) :: flag_conv
+    integer :: ierr
+    real(8) :: err0
+    res=0.0d0
+    res=abs(esp-esp0)
+    max_esperr = maxval( res(1:mb_ref,:,:) )
+    flag_conv = .false.
+    if ( max_esperr < tol_esp ) flag_conv = .true.
+    where( res < tol_esp ) res=-1.0d0
+  END SUBROUTINE conv_check_3
 
 
   SUBROUTINE write_info_sweep

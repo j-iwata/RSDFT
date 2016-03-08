@@ -1,4 +1,4 @@
-# RSDFT ( ver.1.2.1 )
+# RSDFT ( ver.1.2.2 )
 
 Real-space finite-difference pseudopotential density-functional-theory code for first-principles material simulations on massively-parallel computers
 

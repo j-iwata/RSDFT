@@ -101,7 +101,7 @@ MODULE global_variables
   implicit none
 
   integer :: iswitch_scf,iswitch_opt,iswitch_band
-  integer :: iswitch_test,iswitch_tddft
+  integer :: iswitch_test,iswitch_tddft,iswitch_dos
   real(8) :: etime_limit
   logical :: disp_switch
 

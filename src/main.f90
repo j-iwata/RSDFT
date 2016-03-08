@@ -4,6 +4,7 @@ PROGRAM Real_Space_DFT
   use parameters_module
   use func2gp_module
   use band_module
+  use dos_module, only: calc_dos
   use hamiltonian_matrix_module
   use rtddft_mol_module
   use omp_variables, only: init_omp
@@ -349,10 +350,20 @@ PROGRAM Real_Space_DFT
 
 ! ---
 
-  call Init_IO( "sweep" )
-  call calc_sweep( disp_switch, ierr )
-  call Init_IO( "" )
-  if ( ierr == -1 ) goto 900
+  if ( iswitch_dos == 1 ) then
+
+     call control_xc_hybrid(1)
+     call calc_dos( ierr )
+     goto 900
+
+  else
+
+     call Init_IO( "sweep" )
+     call calc_sweep( disp_switch, ierr )
+     call Init_IO( "" )
+     if ( ierr == -1 ) goto 900
+
+  end if
 
 ! ---
 

@@ -61,11 +61,13 @@ CONTAINS
     iswitch_band  = 0
     iswitch_test  = 0
     iswitch_tddft = 0
+    iswitch_dos   = 0
     call IOTools_readIntegerKeyword( "SWSCF"  ,iswitch_scf   )
     call IOTools_readIntegerKeyword( "SWOPT"  ,iswitch_opt   )
     call IOTools_readIntegerKeyword( "SWBAND" ,iswitch_band  )
     call IOTools_readIntegerKeyword( "SWTEST" ,iswitch_test  )
     call IOTools_readIntegerKeyword( "SWTDDFT",iswitch_tddft )
+    call IOTools_readIntegerKeyword( "SWDOS"  ,iswitch_dos   )
 
     call read_atomopt(myrank,unit)
 

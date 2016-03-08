@@ -186,6 +186,7 @@ MODS1 = \
        sweep_module.o\
        scf_chefsi_module.o\
        test_force_module.o\
+       dos_module.o\
        band_module.o\
        force_mol_module.o\
        force_module.o\
