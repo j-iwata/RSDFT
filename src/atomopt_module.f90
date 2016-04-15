@@ -22,6 +22,7 @@ MODULE atomopt_module
   use ps_qrij_prep_module
   use ps_prepNzqr_g_module, only: prepNzqr
   use vdw_grimme_module
+  use efield_module
 
   implicit none
 
@@ -677,6 +678,8 @@ CONTAINS
              call prep_ps_nloc2_mol
 
           end select
+
+          call sawtooth_efield( Vion )
 
           call calc_E_vdw_grimme( aa_atom )
 

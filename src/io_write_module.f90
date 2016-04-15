@@ -21,7 +21,8 @@ CONTAINS
 
     implicit none
     character(*),intent(IN) :: file_wf
-    integer,intent(IN) :: IO_ctrl, OC, SYStype, MBwr1,MBwr2
+    integer,intent(IN) :: IO_ctrl, OC, SYStype
+    integer,intent(INOUT) :: MBwr1,MBwr2
     logical,intent(IN) :: disp_switch
     integer,parameter :: unit = 1
     integer :: i,i1,i2,i3,j1,j2,j3,k,n,s,n1,n2
@@ -71,6 +72,9 @@ CONTAINS
     MS   = MS_WF
     MS_0 = MS_0_WF
     MS_1 = MS_1_WF
+
+    if ( MBwr1<1 .or. MBwr2<MBwr1 .or. MB<MBwr1 ) MBwr1=1
+    if ( MBwr2<1 .or. MBwr2<MBwr1 .or. MB<MBwr2 ) MBwr2=MB
 
 ! ---
 

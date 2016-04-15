@@ -1,4 +1,4 @@
-# RSDFT ( ver.1.2.2 )
+# RSDFT ( ver.1.3.0 )
 
 Real-space finite-difference pseudopotential density-functional-theory code for first-principles material simulations on massively-parallel computers
 
@@ -59,7 +59,11 @@ This product includes software developed by the University of Chicago, as Operat
 
 ## FFTE ( src/ext2/ )
 
-This product includes a fast Fourier transform package FFTE
+This product includes a fast Fourier transform package FFTE.
 ( http://www.ffte.jp )
 
+## libtetrabz ( lib/libtetrabz/ )
+
+This product includes a tetrahedron method library libtetrabz.
+( http://libtetrabz.osdn.jp/ )
 

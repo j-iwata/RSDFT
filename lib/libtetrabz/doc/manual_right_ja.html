@@ -1,0 +1,646 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" 
+          content="text/html; charset=utf-8">
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+    </script>
+    <script type="text/javascript"
+            src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML">
+    </script>
+    <meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+    
+    <title>libtetrabz日本語マニュアル</title>
+    
+    <meta name="description" content="libtetrabz日本語マニュアル">
+    
+  </head>
+  <body bgcolor="CCFFCC">
+    
+    <center><h1>libtetrabz日本語マニュアル</h1></center>
+    <center><h2>バージョン1.0.1</h2></center>
+    <center><h2>河村光晶</h2></center>
+
+    <hr>
+    <h1><a name="hajimeni">はじめに</h1>
+
+    <p>この文書ではテトラへドロン法ライブラリ<code>libtetrabz</code>についての解説を行っている. 
+      <code>libtetrabz</code>は線形テトラへドロン法もしくは最適化線形テトラへドロン法<a href="#cite">[1]</a>
+      を用いて全エネルギーや電荷密度, 部分状態密度, 分極関数等を計算するためのライブラリ群である. 
+      このライブラリには, 軌道エネルギーをインプットとして,</p>
+    <p>$$
+      \begin{aligned}
+        \sum_{n n' k} F(\varepsilon_{n k}, \varepsilon_{n' k+q})X_{n n' k}
+        =
+        \sum_{n n' k} w_{n n' k} X_{n n' k}\end{aligned}
+      $$</p>
+    <p>のような積分における, 
+      積分重み$w_{n n' k}$を出力するサブルーチンを, 
+      各種計算について取り揃えている. 具体的には以下の計算に対応している.</p>
+    <p>$$
+      \begin{aligned}
+      &amp;\sum_{n k} \theta(\varepsilon_{\rm F} - \varepsilon_{n k}) X_{n k}
+      \\
+      &amp;\sum_{n k} \delta(\omega - \varepsilon_{n k}) X_{n k}(\omega)
+      \\
+      &amp;\sum_{n n' k} \delta(\varepsilon_{\rm F} - \varepsilon_{n k})
+      \delta(\varepsilon_{\rm F} - \varepsilon'_{n' k})
+      \\
+      &amp;\sum_{n n' k} \theta(\varepsilon_{\rm F} - \varepsilon_{n k})
+      \theta(\varepsilon_{n k} - \varepsilon'_{n' k})
+      \\
+      &amp;\sum_{n n' k} \frac{\theta(\varepsilon_{\rm F} - \varepsilon_{n k})
+      \theta(\varepsilon'_{n' k} - \varepsilon_{\rm F})}
+      {\varepsilon'_{n' k} - \varepsilon_{n k}} X_{n n' k}
+      \\
+      &amp;\sum_{n n' k} \theta(\varepsilon_{\rm F} - \varepsilon_{n k})
+      \theta(\varepsilon'_{n' k} - \varepsilon_{\rm F})
+      \delta(\varepsilon'_{n' k} - \varepsilon_{n k} - \omega) X_{n n' k}(\omega)
+      \\
+      &amp;\sum_{n n' k} \frac{\theta(\varepsilon_{\rm F} - \varepsilon_{n k})
+      \theta(\varepsilon'_{n' k} - \varepsilon_{\rm F})}
+      {\varepsilon'_{n' k} - \varepsilon_{n k} + i \omega} X_{n n' k}(\omega)
+      \end{aligned}
+      $$</p>
+
+    <hr>
+    <h1><a name="mitlicense">2, MIT ライセンス</a></h1>
+    <p>Copyright (c) 2014 Mitsuaki Kawamura</p>
+    <p>以下に定める条件に従い, 本ソフトウェアおよび関連文書のファイル（以下「ソフトウェア」）
+      の複製を取得するすべての人に対し, ソフトウェアを無制限に扱うことを無償で許可します. 
+      これには, ソフトウェアの複製を使用, 複写, 変更, 結合, 掲載, 頒布, サブライセンス, および/または販売する権利, 
+      およびソフトウェアを提供する相手に同じことを許可する権利も無制限に含まれます.</p>
+    <p>上記の著作権表示および本許諾表示を, ソフトウェアのすべての複製または重要な部分に記載するものとします.</p>
+    <p>ソフトウェアは「現状のまま」で, 明示であるか暗黙であるかを問わず, 何らの保証もなく提供されます. 
+      ここでいう保証とは, 商品性, 特定の目的への適合性, および権利非侵害についての保証も含みますが, 
+      それに限定されるものではありません. 作者または著作権者は, 契約行為, 不法行為, またはそれ以外であろうと, 
+      ソフトウェアに起因または関連し, あるいはソフトウェアの使用またはその他の扱いによって生じる一切の請求, 
+      損害, その他の義務について何らの責任も負わないものとします.</p>
+
+    <hr>
+    <h1><a name="installation">インストール方法</a></h1>
+
+    <hr>
+    <h2><a name="filesinthispackage">3.1, このパッケージに含まれているファイル</a></h2>
+
+    <p><code>doc/manual_en.html</code> : マニュアル(英語)</p>
+    <p><code>doc/manual_jp.html</code> : マニュアル(日本語)(今開いて見ているファイル)</p>
+    <p><code>examples/</code> : ライブラリ使用例</p>
+    <p><code>src/</code> : ソースファイルディレクトリ</p>
+    <p><code>Makefile</code>, <code>make.sys</code> : Makeファイルおよびコンパイル環境設定ファイル</p>
+    
+    <hr>
+    <h2><a name="youken">3.2, 要件</a></h2>
+    
+    <p>以下のものが必要となる.</p>
+    <ul>
+      <li><p>fortran コンパイラ</p></li>
+      <li><p>MPI ライブラリ (MPI/ハイブリッド並列版を利用する場合)</p></li>
+    </ul>
+    
+    <hr>
+    <h2><a name="installtejun">3.3, インストール手順</a></h2>
+    <ol>
+      <li><p>以下の場所から<code>.tar.gz</code>ファイルをダウンロードする.</p>
+        <pre><code>
+http://osdn.jp/projects/libtetrabz/releases/
+        </code></pre>
+      </li>
+      <li><p>ダウンロードした<code>.tar.gz</code>ファイルを展開し, 出来たディレクトリに入る.</p>
+        <pre><code>
+$ tar xzvf libtetrabz_1.0.1.tar.gz
+$ cd libtetrabz
+        </code></pre>
+      </li>
+      <li><p>自分の環境に合わせて <code>make.sys</code>の以下の変数を書き換える.</p>
+        <p><code>TOPDIR</code> : 展開してできたディレクトリの絶対パス</p>
+        <p><code>F90</code> : シリアル用fortran コンパイルコマンド (gfortran, ifort, frt 等)</p>
+        <p><code>MPIF90</code> : MPI用fortran コンパイルコマンド (mpif90, mpiifort, mpifrt 等)</p>
+        <p><code>FFLAGS</code> : fortranコンパイルオプション</p>
+      </li>
+      <li><p>次のコマンドを実行しコンパイルする.</p>
+        <pre><code>$ make </code></pre>
+        <p>コンパイルが成功すると<code>src/</code>に以下のファイルが生成される.</p>
+        <pre><code>
+src/libtetrabz.a
+src/libtetrabz.mod
+src/libtetrabz_mpi.a
+src/libtetrabz_mpi.mod
+        </code></pre>
+        <p>※ シリアル版のみ<code>make</code>したい場合は次の様にする.</p>
+        <pre><code>
+$ cd src 
+$ make libtetrabz.a
+        </code></pre>
+      </li>
+    </ol>
+    <br>
+    <p>また, <code>example/</code>以下のライブラリ使用例のプログラムもコンパイルされる.</p>
+    <p><code>example/dos.x</code> : 立法格子シングルバンドタイトバインディングモデルのDOSを
+      計算する. ソースコードは<code>dos.f90</code></p>
+    <p><code>example/lindhard.x</code> : リントハルト関数を
+      計算する. ソースコードは<code>lindhard.f90</code></p>
+    <p><img src="dos.jpg" align="middle" width="400" alt="DOS計算結果"/>
+      図1: dos.xを使って計算した, 立法格子タイトバインディング模型の状態密度.
+    実線は十分多くの$k$点を利用した時の結果. 
+      &ldquo;$+$&rdquo;, &ldquo;$\times$&rdquo;はそれぞれ$8\times8\times8 k$グリッドでの
+      線形テトラへドロン法および最適化テトラへドロン法の結果.</p>
+    <p><img src="lindhard.jpg" align="middle" width="400" alt="DOS計算結果"/>
+      図2: lindhard.xを使って計算したLindhard関数.
+      実線は解析的な結果. 
+      &ldquo;$+$&rdquo;, &ldquo;$\times$&rdquo;はそれぞれ$8\times8\times8 k$グリッドでの
+      線形テトラへドロン法および最適化テトラへドロン法の結果.</p>
+
+    <hr>
+    <h1><a name="linklibrary">4, ライブラリのリンク方法</a></h1>
+
+    <p><span><strong>例/ intel fortran の場合</strong></span><br />
+      <pre><code>
+$ ifort program.f90 -L {libtetrabzパス}/src/ -I {libtetrabzパス}/src -ltetrabz -fopenmp
+$ mpiifort program.f90 -L {libtetrabzパス}/src/  -I {libtetrabzパス}/src -ltetrabz_mpi -fopenmp
+      </code></pre>
+
+    <p><span><strong>例/ intel C の場合</strong></span><br />
+      <pre><code>
+$ icc -lifcore program.f90 -L {libtetrabzパス}/src/ -I {libtetrabzパス}/src -ltetrabz -fopenmp
+$ mpiicc -lifcore program.f90 -L {libtetrabzパス}/src/  -I {libtetrabzパス}/src -ltetrabz_mpi -fopenmp
+      </code></pre>
+
+    <p><code>-L</code>, <code>-I</code> オプションについては, 以下のように設定すればつける必要は無い.</p>
+    
+    <ul>
+      <li><p><code>.a</code> ファイルを環境変数
+          <code>LIBRALLY_PATH</code>に含まれているディレクトリへコピーする.</p></li>
+      <li><p><code>.mod</code> ファイルを環境変数
+          <code>INCLUDE</code>に含まれているディレクトリへコピーする.</p></li>
+    </ul>
+
+    <hr>
+    <h1><a name="subroutines">各サブルーチンの説明</a></h1>
+    
+    <p>以下のサブルーチンを任意のプログラム内で</p>
+    <pre><code>
+use libtetrabz, only : libtetrabz_occ
+ :
+call libtetrabz_occ(ltetra,bvec,nb,nge,eig,ngw,wght)
+    </code></pre>
+    <p>のように呼び出して使用できる. サブルーチン名はすべて<code>libtetrabz_</code>からはじまる. 
+      MPI版については<code>libtetrabz_mpi_</code>からはじまる.
+      またMPI版では<code>libtetrabz_mpi</code>モジュールをつかう.
+      シリアル版と MPI 版の引数の違いはコミニュケータを指定する整数<code>comm</code>だけで, 他は同じである.</p>
+
+    <p>C言語で書かれたプログラムから呼び出す場合には次のようにする.</p>
+    <pre><code>
+#include "libtetrabz.h"
+ :
+libtetrabz_mp_libtetrabz_occ_(&amp;ltetra,bvec,&amp;nb,nge,eig,ngw,wght)
+    </code></pre>
+    fortranサブルーチン名の前に<code>libtetrabz_mp_</code>を, うしろに<code>_</code>をつけたものが
+    Cでの関数名となる.
+    MPI版では<code>libtetrabz_mpi.h</code>をインクルードし, fortranサブルーチン名の前には
+    <code>libtetrabz_mpi_mp_</code>をつける.
+    変数はすべてポインタとして渡す.
+    配列はすべて1次元配列として定義し一番左の添字が内側のループとなるようにする.
+
+    <hr>
+    <h2><a name="totalenergy">5.1, 全エネルギー, 電荷密度等(占有率の計算)</a></h2>
+    <p>
+      $$\begin{aligned}
+        \sum_{n k} \theta(\varepsilon_{\rm F} - \varepsilon_{n k}) X_{n k}
+      \end{aligned}$$
+    </p>
+    <pre><code>
+subroutine libtetrabz_occ(ltetra,bvec,nb,nge,eig,ngw,wght)
+  integer,intent(in) :: ltetra, nge(3), ngw(3), nb
+  real(8),intent(in) :: bvec(3,3)
+  real(8),intent(in) :: eig(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_occ
+
+subroutine libtetrabz_mpi_occ(ltetra,comm,bvec,nb,nge,eig,ngw,wght)
+  integer,intent(in) :: ltetra, comm, nge(3), ngw(3), nb
+  real(8),intent(in) :: bvec(3,3)
+  real(8),intent(in) :: eig(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_mpi_occ
+    </code></pre>
+
+    <p><code>ltetra</code> : (入力, 整数)テトラへドロン法の種類を決める.
+      1$\cdots$線形テトラへドロン法, 2$\cdots$最適化線形テトラへドロン法</p>
+    <p><code>comm</code> : (入力, 整数) MPI 版のみ. コミニュケータ.</p>
+    <p><code>bvec(3,3)</code> : (入力, 実数配列)逆格子ベクトル. 単位は任意で良い. 
+      逆格子の形によって四面体の切り方を決めるため, 
+      それらの長さの比のみが必要であるため.</p>
+    <p><code>nb</code> : (入力, 整数) バンド本数</p>
+    <p><code>nge(3)</code> : (入力, 整数配列) 軌道エネルギーのメッシュ数.</p>
+    <p><code>eig(nb,nge(1),nge(2),nge(3))</code> : (入力, 実数配列) 軌道エネルギー. 
+      Fermiエネルギーを基準とすること($\varepsilon_{\rm F} = 0$).</p>
+    <p><code>ngw(3)</code> : (入力, 整数配列) 積分重みの$k$メッシュ. 
+      <code>nge</code>と違っていても構わない(付録参照).</p>
+    <p><code>wght(nb,ngw(1),ngw(2),ngw(3))</code> : (出力, 実数配列) 積分重み</p>
+
+    <hr>
+    <h2><a name="fermienergy">5.2, Fermi エネルギー(占有率も同時に計算する)</a></h2>
+    <p>
+      $$\begin{aligned}
+        &amp;\sum_{n k} \theta(\varepsilon_{\rm F} - \varepsilon_{n k}) X_{n k}
+      \end{aligned}$$
+    </p>
+    <pre><code>
+subroutine libtetrabz_fermieng(ltetra,bvec,nb,nge,eig,ngw,wght,ef,nelec)
+  integer,intent(in) :: ltetra, nge(3), ngw(3), nb
+  real(8),intent(in) :: bvec(3,3), nelec
+  real(8),intent(in) :: eig(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: ef
+  real(8),intent(out) :: wght(nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_fermieng
+
+subroutine libtetrabz_mpi_fermieng(ltetra,comm,bvec,nb,nge,eig,ngw,wght,ef,nelec)
+  integer,intent(in) :: ltetra, comm, nge(3), ngw(3), nb
+  real(8),intent(in) :: bvec(3,3), nelec
+  real(8),intent(in) :: eig(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: ef
+  real(8),intent(out) :: wght(nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_mpi_fermieng
+    </code></pre>
+    <p><code>ltetra</code> :  (入力, 整数)テトラへドロン法の種類を決める.
+      1$\cdots$線形テトラへドロン法, 2$\cdots$最適化線形テトラへドロン法</p>
+    <p><code>comm</code> :  (入力, 整数) MPI 版のみ. コミニュケータ.</p>
+    <p><code>bvec(3,3)</code> :  (入力, 実数配列)逆格子ベクトル. 単位は任意で良い. 
+      逆格子の形によって四面体の切り方を決めるため, それらの長さの比のみが必要であるため.</p>
+    <p><code>nb</code> :  (入力, 整数)バンド本数</p>
+    <p><code>nge(3)</code> :  (入力, 整数配列) 軌道エネルギーのメッシュ数.</p>
+    <p><code>eig(nb,nge(1),nge(2),nge(3))</code> :  (入力, 実数配列) 軌道エネルギー.</p>
+    <p><code>ngw(3)</code> :  (入力, 整数配列) 積分重みの$k$メッシュ. 
+      <code>nge</code>と違っていても構わない(付録参照).</p>
+    <p><code>wght(nb,ngw(1),ngw(2),ngw(3))</code> :  (出力, 実数配列) 積分重み</p>
+    <p><code>ef</code> :  (出力, 実数) Fermi エネルギー</p>
+    <p><code>nelec</code> :  スピンあたりの(荷)電子数</p>
+
+    <hr>
+    <h2><a name="partialdos">5.3, (部分)状態密度</a></h2>
+
+    <p>
+      $$\begin{aligned}
+        &amp;\sum_{n k} \delta(\omega - \varepsilon_{n k}) X_{n k}(\omega)
+      \end{aligned}$$
+    </p>
+    <pre><code>
+subroutine libtetrabz_dos(ltetra,bvec,nb,nge,eig,ngw,wght,ne,e0)
+  integer,intent(in) :: ltetra, nge(3), ngw(3), nb, ne
+  real(8),intent(in) :: bvec(3,3), e0(ne)
+  real(8),intent(in) :: eig(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(ne,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_dos
+
+subroutine libtetrabz_mpi_dos(ltetra,comm,bvec,nb,nge,eig,ngw,wght,ne,e0)
+  integer,intent(in) :: ltetra, comm, nge(3), ngw(3), nb, ne
+  real(8),intent(in) :: bvec(3,3), e0(ne)
+  real(8),intent(in) :: eig(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(ne,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_mpi_dos
+    </code></pre>
+
+    <p><code>ltetra</code> :  (入力, 整数)テトラへドロン法の種類を決める.
+    1$\cdots$線形テトラへドロン法, 2$\cdots$最適化線形テトラへドロン法</p>
+    <p><code>comm</code> :  (入力, 整数) MPI 版のみ. コミニュケーター.</p>
+    <p><code>bvec(3,3)</code> :  (入力, 実数配列)逆格子ベクトル. 単位は任意で良い. 
+      逆格子の形によって四面体の切り方を決めるため, それらの長さの比のみが必要であるため.</p>
+    <p><code>nb</code> :  (入力, 整数)バンド本数</p>
+    <p><code>nge(3)</code> :  (入力, 整数配列) 軌道エネルギーのメッシュ数.</p>
+    <p><code>eig(nb,nge(1),nge(2),nge(3))</code> :  (入力, 実数配列) 軌道エネルギー.</p>
+    <p><code>ngw(3)</code> :  (入力, 整数配列) 積分重みの$k$メッシュ. 
+      <code>nge</code>と違っていても構わない(付録参照).</p>
+    <p><code>wght(ne,nb,ngw(1),ngw(2),ngw(3))</code> :  (出力, 実数配列) 積分重み</p>
+    <p><code>ne</code> :  (入力, 整数)状態密度を計算するエネルギー点数</p>
+    <p><code>e0(ne)</code> :  (入力, 実数配列) 状態密度を計算するエネルギー</p>
+
+    <hr>
+    <h2><a name="nesting">5.4, ネスティング関数, Fröhlich パラメーター</a></h2>
+    <p>
+      $$\begin{aligned}
+      &amp;\sum_{n n' k} \delta(\varepsilon_{\rm F} - \varepsilon_{n k})
+      \delta(\varepsilon_{\rm F} - \varepsilon'_{n' k})
+      \end{aligned}$$
+    </p>
+    <pre><code>
+subroutine libtetrabz_doubledelta(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght)
+  integer,intent(in) :: ltetra, nge(3), ngw(3), nb
+  real(8),intent(in) :: bvec(3,3)
+  real(8),intent(in) :: eig1(nb,nge(1),nge(2),nge(3)), eig2(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(nb,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_doubledelta
+
+subroutine libtetrabz_mpi_doubledelta(ltetra,comm,bvec,nb,nge,eig1,eig2,ngw,wght)
+  integer,intent(in) :: ltetra, comm0, nge(3), ngw(3), nb
+  real(8),intent(in) :: bvec(3,3)
+  real(8),intent(in) :: eig1(nb,nge(1),nge(2),nge(3)), eig2(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(nb,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_mpi_doubledelta
+    </code></pre>
+    
+    <p><code>ltetra</code> :  (入力, 整数)テトラへドロン法の種類を決める.
+    1$\cdots$線形テトラへドロン法, 2$\cdots$最適化線形テトラへドロン法</p>
+    <p><code>comm</code> :  (入力, 整数) MPI 版のみ. コミニュケータ.</p>
+    <p><code>bvec(3,3)</code> :  (入力, 実数配列)逆格子ベクトル. 単位は任意で良い. 
+      逆格子の形によって四面体の切り方を決めるため, それらの長さの比のみが必要であるため.</p>
+    <p><code>nb</code> :  (入力, 整数)バンド本数</p>
+    <p><code>nge(3)</code> :  (入力, 整数配列) 軌道エネルギーのメッシュ数.</p>
+    <p><code>eig1(nb,nge(1),nge(2),nge(3))</code> :  (入力, 実数配列) 軌道エネルギー. 
+      Fermi エネルギーを基準とすること($\varepsilon_{\rm F}=0$). <code>eig2</code> も同様.</p>
+    <p><code>eig2(nb,nge(1),nge(2),nge(3))</code> :  (入力, 実数配列) 軌道エネルギー. 
+      移行運動量の分だけグリッドをずらしたものなど.</p>
+    <p><code>ngw(3)</code> :  (入力, 整数配列) 積分重みの$k$メッシュ. 
+      <code>nge</code>と違っていても構わない(付録参照).</p>
+    <p><code>wght(nb,nb,ngw(1),ngw(2),ngw(3))</code> :  (出力, 実数配列) 積分重み</p>
+    
+    <hr>
+    <h2><a name="occstep">5.5, DFPT 計算の一部</a></h2>
+    <p>
+      $$\begin{aligned}
+      &amp;\sum_{n n' k} \theta(\varepsilon_{\rm F} - \varepsilon_{n k})
+      \theta(\varepsilon_{n k} - \varepsilon'_{n' k})
+      \end{aligned}$$
+    </p>
+    <pre><code>
+subroutine libtetrabz_occstep(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght)
+integer,intent(in) :: ltetra, nge(3), ngw(3), nb
+  real(8),intent(in) :: bvec(3,3)
+  real(8),intent(in) :: eig1(nb,nge(1),nge(2),nge(3)), eig2(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(nb,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_occstep
+
+subroutine libtetrabz_mpi_occstep(ltetra,comm0,bvec,nb,nge,eig1,eig2,ngw,wght)
+  integer,intent(in) :: ltetra, comm0, nge(3), ngw(3), nb
+  real(8),intent(in) :: bvec(3,3)
+  real(8),intent(in) :: eig1(nb,nge(1),nge(2),nge(3)), eig2(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(nb,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_mpi_occstep
+    </code></pre>
+
+    <p><code>ltetra</code> :  (入力, 整数)テトラへドロン法の種類を決める.
+    1$\cdots$線形テトラへドロン法, 2$\cdots$最適化線形テトラへドロン法</p>
+    <p><code>comm</code> :  (入力, 整数) MPI 版のみ. コミニュケータ.</p>
+    <p><code>bvec(3,3)</code> :  (入力, 実数配列)逆格子ベクトル. 単位は任意で良い. 
+      逆格子の形によって四面体の切り方を決めるため, それらの長さの比のみが必要であるため.</p>
+    <p><code>nb</code> :  (入力, 整数)バンド本数</p>
+    <p><code>nge(3)</code> :  (入力, 整数配列) 軌道エネルギーのメッシュ数.</p>
+    <p><code>eig1(nb,nge(1),nge(2),nge(3))</code> :  (入力, 実数配列) 軌道エネルギー. 
+      Fermi エネルギーを基準とすること($\varepsilon_{\rm F}=0$). <code>eig2</code> も同様.</p>
+    <p><code>eig2(nb,nge(1),nge(2),nge(3))</code> :  (入力, 実数配列) 軌道エネルギー. 
+      移行運動量の分だけグリッドをずらしたものなど.</p>
+    <p><code>ngw(3)</code> :  (入力, 整数配列) 積分重みの$k$メッシュ. 
+      <code>nge</code> と違っていても構わない(付録参照).</p>
+    <p><code>wght(nb,nb,ngw(1),ngw(2),ngw(3))</code> :  (出力, 実数配列) 積分重み</p>
+
+    <hr>
+    <h2><a name="polstat">5.6, 独立分極関数(静的, $\omega=0$)</a></h2>
+   
+    <p>
+      $$\begin{aligned}
+      &amp;\sum_{n n' k} \frac{\theta(\varepsilon_{\rm F} - \varepsilon_{n k})
+      \theta(\varepsilon'_{n' k} - \varepsilon_{\rm F})}
+      {\varepsilon'_{n' k} - \varepsilon_{n k}} X_{n n' k}
+      \end{aligned}$$
+    </p>
+    <pre><code>
+subroutine libtetrabz_polstat(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght)
+  integer,intent(in) :: ltetra, nge(3), ngw(3), nb
+  real(8),intent(in) :: bvec(3,3)
+  real(8),intent(in) :: eig1(nb,nge(1),nge(2),nge(3)), eig2(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(nb,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_polstat
+
+subroutine libtetrabz_mpi_occstep(ltetra,comm0,bvec,nb,nge,eig1,eig2,ngw,wght)
+  integer,intent(in) :: ltetra, comm0, nge(3), ngw(3), nb
+  real(8),intent(in) :: bvec(3,3)
+  real(8),intent(in) :: eig1(nb,nge(1),nge(2),nge(3)), eig2(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(nb,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_mpi_occstep
+    </code></pre>
+
+    <p><code>ltetra</code> :  (入力, 整数)テトラへドロン法の種類を決める.
+    1$\cdots$線形テトラへドロン法, 2$\cdots$最適化線形テトラへドロン法</p>
+    <p><code>comm</code> :  (入力, 整数) MPI 版のみ. コミニュケータ.</p>
+    <p><code>bvec(3,3)</code> :  (入力, 実数配列)逆格子ベクトル. 単位は任意で良い. 
+      逆格子の形によって四面体の切り方を決めるため, それらの長さの比のみが必要であるため.</p>
+    <p><code>nb</code> :  (入力, 整数)バンド本数</p>
+    <p><code>nge(3)</code> :  (入力, 整数配列) 軌道エネルギーのメッシュ数.</p>
+    <p><code>eig1(nb,nge(1),nge(2),nge(3))</code> :  (入力, 実数配列) 軌道エネルギー. 
+      Fermi エネルギーを基準とすること($\varepsilon_{\rm F}=0$). <code>eig2</code> も同様.</p>
+    <p><code>eig2(nb,nge(1),nge(2),nge(3))</code> :  (入力, 実数配列) 軌道エネルギー. 
+      移行運動量の分だけグリッドをずらしたものなど.</p>
+    <p><code>ngw(3)</code> :  (入力, 整数配列) 積分重みの$k$メッシュ. 
+      <code>nge</code>と違っていても構わない(付録参照).</p>
+    <p><code>wght(nb,nb,ngw(1),ngw(2),ngw(3))</code> :  (出力, 実数配列) 積分重み</p>
+    
+    <hr>
+    <h2><a name="linewidth">5.7, フォノン線幅等</a></h2>
+    <p>
+      $$\begin{aligned}
+      &amp;\sum_{n n' k} \theta(\varepsilon_{\rm F} - \varepsilon_{n k})
+      \theta(\varepsilon'_{n' k} - \varepsilon_{\rm F})
+      \delta(\varepsilon'_{n' k} - \varepsilon_{n k} - \omega) X_{n n' k}(\omega)
+      \end{aligned}$$
+    </p>
+    
+    <pre><code>
+subroutine libtetrabz_fermigr(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,ne,e0)
+  integer,intent(in) :: ltetra, nge(3), ngw(3), nb, ne
+  real(8),intent(in) :: bvec(3,3), e0(ne)
+  real(8),intent(in) :: eig1(nb,nge(1),nge(2),nge(3)), eig2(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(ne,nb,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_fermigr
+
+subroutine libtetrabz_mpi_fermigr(ltetra,comm0,bvec,nb,nge,eig1,eig2,ngw,wght,ne,e0)
+  integer,intent(in) :: ltetra, comm0, nge(3), ngw(3), nb, ne
+  real(8),intent(in) :: bvec(3,3), e0(ne)
+  real(8),intent(in) :: eig1(nb,nge(1),nge(2),nge(3)), eig2(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(ne,nb,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_mpi_fermigr
+    </code></pre>
+    
+    <p><code>ltetra</code> :  (入力, 整数)テトラへドロン法の種類を決める.
+    1$\cdots$線形テトラへドロン法, 2$\cdots$最適化線形テトラへドロン法</p>
+    <p><code>comm</code> :  (入力, 整数) MPI 版のみ. コミニュケータ.</p>
+    <p><code>bvec(3,3)</code> :  (入力, 実数配列)逆格子ベクトル. 単位は任意で良い. 
+      逆格子の形によって四面体の切り方を決めるため, それらの長さの比のみが必要であるため.</p>
+    <p><code>nb</code> :  (入力, 整数)バンド本数</p>
+    <p><code>nge(3)</code> :  (入力, 整数配列) 軌道エネルギーのメッシュ数.</p>
+    <p><code>eig1(nb,nge(1),nge(2),nge(3))</code> :  (入力, 実数配列) 軌道エネルギー. 
+      Fermi エネルギーを基準とすること($\varepsilon_{\rm F} = 0$). <code>eig2</code>も同様.</p>
+    <p><code>eig2(nb,nge(1),nge(2),nge(3))</code> :  (入力, 実数配列) 軌道エネルギー. 
+      移行運動量の分だけグリッドをずらしたものなど.</p>
+    <p><code>ngw(3)</code> :  (入力, 整数配列) 積分重みの$k$メッシュ. 
+      <code>nge</code> と違っていても構わない(付録参照).</p>
+    <p><code>wght(ne,nb,nb,ngw(1),ngw(2),ngw(3))</code> :  (出力, 実数配列) 積分重み</p>
+    <p><code>ne</code> :  (入力, 整数)フォノンモード数</p>
+    <p><code>e0(ne)</code> :  (入力, 実数配列) フォノン振動数</p>
+
+    <hr>
+    <h2><a name="polimg">5.8, 分極関数(虚振動数)</a></h2>
+    <p>
+      $$\begin{aligned}
+      &amp;\sum_{n n' k} \frac{\theta(\varepsilon_{\rm F} - \varepsilon_{n k})
+      \theta(\varepsilon'_{n' k} - \varepsilon_{\rm F})}
+      {\varepsilon'_{n' k} - \varepsilon_{n k} + i \omega} X_{n n' k}(\omega)
+      \end{aligned}$$
+    </p>
+    <pre><code>
+subroutine libtetrabz_polimg(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,ne,e0)
+  integer,intent(in) :: ltetra, nge(3), ngw(3), nb, ne
+  real(8),intent(in) :: bvec(3,3), e0(ne)
+  real(8),intent(in) :: eig1(nb,nge(1),nge(2),nge(3)), eig2(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(2,ne,nb,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_polimg
+
+subroutine libtetrabz_mpi_polimg(ltetra,comm0,bvec,nb,nge,eig1,eig2,ngw,wght,ne,e0)
+  integer,intent(in) :: ltetra, comm0, nge(3), ngw(3), nb, ne
+  real(8),intent(in) :: bvec(3,3), e0(ne)
+  real(8),intent(in) :: eig1(nb,nge(1),nge(2),nge(3)), eig2(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(2,ne,nb,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_mpi_polimg
+    </code></pre>
+    
+    <p><code>ltetra</code> :  (入力, 整数)テトラへドロン法の種類を決める.
+      1$\cdots$線形テトラへドロン法, 2$\cdots$最適化線形テトラへドロン法</p>
+    <p><code>comm</code> :  (入力, 整数) MPI 版のみ. コミニュケータ.</p>
+    <p><code>bvec(3,3)</code> :  (入力, 実数配列)逆格子ベクトル. 単位は任意で良い. 
+      逆格子の形によって四面体の切り方を決めるため, それらの長さの比のみが必要であるため.</p>
+    <p><code>nb</code> :  (入力, 整数)バンド本数</p>
+    <p><code>nge(3)</code> :  (入力, 整数配列) 軌道エネルギーのメッシュ数.</p>
+    <p><code>eig1(nb,nge(1),nge(2),nge(3))</code> :  (入力, 実数配列) 軌道エネルギー. 
+      Fermi エネルギーを基準とすること($\varepsilon_{\rm F}=0$). <code>eig2</code>も同様.</p>
+    <p><code>eig2(nb,nge(1),nge(2),nge(3))</code> :  (入力, 実数配列) 軌道エネルギー. 
+      移行運動量の分だけグリッドをずらしたものなど.</p>
+    <p><code>ngw(3)</code> :  (入力, 整数配列) 積分重みの$k$メッシュ. 
+      <code>nge</code>と違っていても構わない(付録参照).</p>
+    <p><code>wght(2,ne,nb,nb,ngw(1),ngw(2),ngw(3))</code> :  (出力, 実数配列) 積分重み . 
+      1番目の次元は実部と虚部を格納する.</p>
+    <p><code>ne</code> :  (入力, 整数)計算を行う虚振動数の点数</p>
+    <p><code>e0(ne)</code> :  (入力, 実数配列) 計算を行う虚振動数</p>
+
+    <hr>
+    <h1><a name="samplecode">6, サンプルコード(抜粋)</a></h1>
+    <p>以下では電荷密度を計算するサブルーチンを示す。</p>
+    <p>
+      $$\begin{aligned}
+      \rho(r) = 2 \sum_{n k} \theta(\varepsilon_{\rm F} - \varepsilon_{n k}) |\varphi_{n k}(r)|^2
+      \end{aligned}$$
+    </p>
+    <pre><code>
+subroutin calc_rho(nr,nb,ng,nelec,bvec,eig,ef,phi,rho)
+  !
+  use libtetrabz, only : libtetrabz_fermieng
+  implicit none
+  !
+  integer,intent(in) :: nr ! number of r
+  integer,intent(in) :: nb ! number of bands
+  integer,intent(in) :: ng(3)
+  ! k-point mesh
+  real(8),intent(in) :: nelec ! number of electrons per spin
+  real(8),intent(in) :: bvec(3,3) ! reciplocal lattice vector
+  real(8),intent(in) :: eig(nb,ng(1),ng(2),ng(3)) ! Kohn-Sham eigenvalues
+  real(8),intent(out) :: ef ! Fermi energy
+  complex(8),intent(in) :: phi(nr,nb,ng(1),ng(2),ng(3)) ! Kohn-Sham orbitals
+  real(8),intent(out) :: rho(nr) ! Charge density
+  !
+  integer :: ib, i1, i2, i3, ltetra
+  real(8) :: wght(nb,ng(1),ng(2),ng(3))
+  !
+  ltetra = 2
+  !
+  call libtetrabz_fermieng(ltetra,bvec,nb,ng,eig,ng,wght,ef,nelec)
+  !
+  rho(1:nr) = 0d0
+  do i1 = 1, ng(3)
+     do i2 = 1, ng(2)
+        do i1 = 1, ng(1)
+           do ib = 1, nb
+              rho(1:nr) = rho(1:nr) + 2d0 * wght(ib,i1,i2,i3) &amp;
+              &amp;     * dble(conjg(phi(1:nr,ib,i1,i2,i3)) * phi(1:nr,ib,i1,i2,i3))
+           end do
+        end do
+     end do
+  end do
+  !
+end subroutin calc_rho
+    </code></pre>
+    
+    <hr>    
+    <h1><a name="contact">7, 問い合わせ先</a></h1>
+    <p>プログラムのバグや質問は以下のフォーラムへご投稿ください.</p>
+    <pre><code>
+http://sourceforge.jp/projects/libtetrabz/forums/
+    </code></pre>
+    <p>開発に参加したい方は以下の連絡先にて受け付けております.</p>
+    <p>東京大学物性研究所</p>
+    <p>河村光晶</p>
+    <p><code>mkawamura__at__issp.u-tokyo.ac.jp</code></p>
+
+    <hr>
+    <h1><a name="interpolation">付録1, 逆補間</a></h1>
+    <p>積分</p>
+    <p>
+      $$\begin{aligned}
+      \langle X \rangle = \sum_{k} X_k w(\varepsilon_k)
+      \end{aligned}$$
+    </p>
+    <p>を計算するとする. このとき,</p>
+    <ul>
+      <li><p>$w$は$\varepsilon_k$に敏感な関数(階段関数$\cdot$デルタ関数等)であり, 
+          なるべく細かいグリッド上の$\varepsilon_k$が必要である.</p></li>
+      <li><p>$X_k$を求めるための計算コストが$\varepsilon_k$の計算コストよりかなり大きい.</p></li>
+    </ul>
+    <p>という場合には$X_k$のグリッドを補間により増やす方法が有効である. それは,</p>
+    <ol>
+      <li><p>$\varepsilon_k$を細かい$k$グリッド上で計算する.</p></li>
+      <li><p>$X_k$を粗いグリッド上で計算し, 
+          それを補間(線形補間, 多項式補間, スプライン補間など)して細かいグリッド上での値を得る.</p>
+        <p>
+          $$\begin{aligned}
+          X_k^{\rm dense} = \sum_{k'}^{\rm coarse} F_{k k'} X_{k'}^{\rm coarse}
+          \end{aligned}$$
+        </p>
+      </li>
+      <li><p>細かい$k$グリッドで上記の積分を行う.</p>
+        <p>
+          $$\begin{aligned}
+          \langle X \rangle = \sum_{k}^{\rm dense} X_k^{\rm dense} w_k^{\rm dense}
+          \end{aligned}$$
+        </p>
+      </li>
+    </ol>
+    <p>という流れで行われる.</p>
+    <p>さらに, この計算と同じ結果を得るように粗いグリッド上での積分重み$w_k^{\rm coarse}$を
+      $w_k{\rm dense}$から求める(逆補間)ことも可能である. すなわち,</p>
+        <p>
+          $$\begin{aligned}
+          \sum_k^{\rm dense} X_k^{\rm dense} w_k^{\rm dense}
+          =
+          \sum_k^{\rm coarse} X_k^{\rm coarse} w_k^{\rm coarse}
+          \end{aligned}$$
+        </p>
+    <p>が満たされる事を要請すると</p>
+    <p>
+      $$\begin{aligned}
+      w_k^{\rm coarse} = \sum_k^{\rm dense} F_{k ' k} w_{k'}^{\rm dense}
+      \end{aligned}$$
+    </p>
+    <p>となる. この場合の計算手順は,</p>
+    <ol>
+      <li><p>細かい$k$グリッド上の
+          $\varepsilon_k$から$w_k^{\rm dense}$を計算する.</p></li>
+      <li><p>逆補間により$w_k^{\rm coarse}$を求める.</p></li>
+      <li><p>粗いグリッド上での$X_k$との積和を行う.</p></li>
+    </ol>
+    <p>となる. このライブラリ内の全ルーチンはこの逆補間の機能を備えており, 
+      軌道エネルギーの$k$グリッドと重み関数の$k$グリッドを
+      異なる値にすると逆補間された$w_k^{\rm coarse}$が出力される.</p>
+
+    <p><a name="cite">
+        [1] M. Kawamura, Y. Gohda, S. Tsuneyuki, Phys. Rev. B <span><strong>89</strong></span> 094515 (2014).
+    </a></p>
+
+  </body>
+</html>

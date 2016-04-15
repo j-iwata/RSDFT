@@ -1,7 +1,7 @@
 MODULE xc_ggapbe96_2_module
 
   use gradient_module
-  use grid_module, only: grid, get_map_3d_to_1d
+  use grid_module, only: grid, get_map_3d_to_1d_grid
   use xc_variables, only: xcpot, xcene
   use fd_module, only: fd, construct_nabla_fd
   use lattice_module, only: lattice, get_aa_lattice, get_reciprocal_lattice
@@ -76,7 +76,7 @@ CONTAINS
     ML2 = rgrid%g3%y%size_global
     ML3 = rgrid%g3%z%size_global
 
-    call get_map_3d_to_1d( LLL )
+    call get_map_3d_to_1d_grid( rgrid, LLL )
 
 ! ---
 

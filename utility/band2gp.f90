@@ -8,10 +8,21 @@ PROGRAM band_plot
   integer :: nbk,mb,mbv,mbc,mb1,mb2,msp
   real(8),parameter :: HT=27.2116d0
   real(8),allocatable :: eval(:,:,:),dk_bz(:,:)
-  real(8) :: evb,ecb,dummy,rdummy(4),bb(3,3),esft
+  real(8) :: evb,ecb,efermi,dummy,rdummy(4),bb(3,3),esft
   real(8) :: kx,ky,kz,d1,d2,d3
+  character(64) :: cbuf
+  logical :: flag_versioned
 
   open(u1,file="band_eigv",status='old')
+  read(u1,*) cbuf ; write(*,*) cbuf
+  if ( cbuf(1:7) == "version" ) then
+     flag_versioned = .true.
+     read(u1,*) cbuf, efermi
+     read(u1,*)
+  else
+     flag_versioned = .false.
+     rewind u1
+  end if
   read(u1,*) bb(1:3,1)
   read(u1,*) bb(1:3,2)
   read(u1,*) bb(1:3,3)
@@ -28,6 +39,11 @@ PROGRAM band_plot
   nbk=loop
 
   rewind u1
+  if ( flag_versioned ) then
+     read(u1,*)
+     read(u1,*)
+     read(u1,*)
+  end if
   read(u1,*) bb(1:3,1)
   read(u1,*) bb(1:3,2)
   read(u1,*) bb(1:3,3)
@@ -57,12 +73,17 @@ PROGRAM band_plot
   mbi(:)=mb
 
   rewind u1
+  if ( flag_versioned ) then
+     read(u1,*)
+     read(u1,*)
+     read(u1,*)
+  end if
   read(u1,*)
   read(u1,*)
   read(u1,*)
   do i=1,nbk
      read(u1,*) k,idummy2,dk_bz(1:3,k),dummy
-     write(*,'(1x,2i4,3f12.6,i4)') k,idummy2,dk_bz(1:3,k),nint(dummy)
+!     write(*,'(1x,2i4,3f12.6,i4)') k,idummy2,dk_bz(1:3,k),nint(dummy)
      do j=1,mbi(i)
         read(u1,*) idummy,(eval(j,k,s),rdummy(s),s=1,msp)
      end do
@@ -87,14 +108,15 @@ PROGRAM band_plot
   evb = maxval( eval(1:mbv,1:nbk,:) )
   ecb = minval( eval(mbc:mb,1:nbk,:) )
 
+  if ( flag_versioned ) write(*,*) "efermi=",efermi
   write(*,*) "evb=",evb
   write(*,*) "ecb=",ecb
   write(*,*) "eg(HT,eV)=",ecb-evb,(ecb-evb)*HT
 
 !------------------------------
 
-  write(*,*) &
-       "Which energy is used as origin ? [ 1:evb, 2:ecb, or arbitrary number ]"
+  write(*,*) "Which energy is used as origin ?"
+  write(*,*) "[ 1:evb, 2:ecb, 3:efermi, or arbitrary number ]"
   read(*,*) esft
   i=nint(esft)
   if ( abs(esft-dble(i)) > 1.d-10 ) i=0
@@ -104,6 +126,12 @@ PROGRAM band_plot
      esft=evb
   case(2)
      esft=ecb
+  case(3)
+     if ( flag_versioned ) then
+        esft=efermi
+     else
+        write(*,*) "Fermi energy is not included in this old-format file!"
+     end if
   end select
 
   write(*,*) "e_shift(HT,eV)=",esft,esft*HT
@@ -136,7 +164,7 @@ CONTAINS
     end do
     end do
 
-    open(unit0,file='plot_band',status='new')
+    open(unit0,file='plot_band')
     unit=unit0
     write(unit0,'(1x,"set nokey")')
 

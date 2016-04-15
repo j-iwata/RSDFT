@@ -1,3 +1,14 @@
+RSDFT ( ver.1.3.0 )
+  Bug fixes:
+    band unfolding with spin
+    rsmol in complex16
+  New features:
+    DOS calculation with libterzbz ( see lib/libtetrabz/ )
+    vrho.dat1 format is changed
+     ( version, lattice and atomic coordinates are included )
+     ( previous format still can read )
+    performance improvement for van der Waals DFT 
+
 RSDFT ( ver.1.2.2 )
   DOS calculation routine
   講習会資料（2016.3.8）

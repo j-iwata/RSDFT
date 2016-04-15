@@ -23,16 +23,14 @@ MODULE scf_module
   use esp_gather_module
   use density_module
   use watch_module
-
   use ps_getDij_module
-
   use ggrid_module, only: Ecut
   use rgrid_module, only: dV, Ngrid
   use esp_calc_module
-
   use force_module, only: get_fmax_force
   use hamiltonian_module
   use io_tools_module
+  use eigenvalues_module
 
   implicit none
 
@@ -93,6 +91,7 @@ CONTAINS
     real(8) :: Etot, Ehwf, diff_etot
     real(8) :: Ntot(4), sqerr_out(4)
     logical,external :: exit_program
+    type(eigv) :: eval
 
     call write_border( 0, "" )
     call write_border( 0, " SCF START -----------" )
@@ -370,6 +369,8 @@ CONTAINS
 ! ---
 
        call write_esp_wf
+       call construct_eigenvalues( Nband, Nbzsm, Nspin, esp, eval )
+       if ( myrank == 0 ) call write_eigenvalues( eval )
 
        call global_watch( .false., flag_end1 )
 

@@ -89,7 +89,14 @@ PROGRAM cubegen_wf
   read(u1) LL
   read(u1) occ
 
-  if ( i <=0 ) read(u1)
+  if ( i <= 0 ) then
+     read(u1)
+     read(u1)
+     read(u1)
+     read(u1)
+     read(u1)
+     read(u1)
+  end if
 
   write(*,*) "ML=",ML
   write(*,*) "ML1,ML2,ML3=",ML1,ML2,ML3

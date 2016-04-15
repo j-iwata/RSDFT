@@ -10,7 +10,7 @@ MODULE total_energy_module
   use ps_local_module, only: Vion, const_ps_local
   use density_module, only: rho
   use parallel_module
-  use fermi_module, only: Efermi,Eentropy
+  use fermi_module, only: efermi,Eentropy
   use array_bound_module, only: ML_0,ML_1,MB,MB_0,MB_1 &
                                ,MBZ,MBZ_0,MBZ_1,MSP,MSP_0,MSP_1
   use fock_module
@@ -20,8 +20,8 @@ MODULE total_energy_module
   implicit none
 
   PRIVATE
-  PUBLIC :: calc_total_energy,calc_with_rhoIN_total_energy, &
-            write_info_total_energy
+  PUBLIC :: calc_total_energy
+  PUBLIC :: calc_with_rhoIN_total_energy
 
   integer :: scf_iter_
 
@@ -53,11 +53,12 @@ MODULE total_energy_module
 CONTAINS
 
 
-  SUBROUTINE calc_total_energy( flag_recalc_esp, Etot )
+  SUBROUTINE calc_total_energy( flag_recalc_esp, Etot, unit_in )
     implicit none
     logical,intent(IN) :: flag_recalc_esp
     real(8),intent(INOUT) :: Etot
-    integer :: i,n,k,s,n1,n2,ierr,nb1,nb2
+    integer,optional,intent(IN) :: unit_in
+    integer :: i,n,k,s,n1,n2,ierr,nb1,nb2,unit
     real(8) :: s0(4),s1(4),uu,cnst
     real(8),allocatable :: esp0(:,:,:,:),esp1(:,:,:,:)
     real(8),allocatable :: esp0_Q(:,:,:),esp1_Q(:,:,:)
@@ -277,7 +278,9 @@ CONTAINS
     diff_etot = Etot - Etot_0
 !    diff_etot = Etot - Ehwf
 
-    call write_info_total_energy( Etot, (myrank==0), .true. )
+    unit=99 ; if ( present(unit_in) ) unit=unit_in
+    call write_info_total_energy( Etot, (myrank==0), unit )
+
 !    if ( present(flag_rewind) ) then
 !       call write_info_total_energy( disp_switch, flag_rewind )
 !    else
@@ -336,13 +339,17 @@ CONTAINS
   END SUBROUTINE calc_with_rhoIN_total_energy
 
 
-  SUBROUTINE write_info_total_energy( Etot, flag_write, flag_rewind )
+  SUBROUTINE write_info_total_energy( Etot, flag_write, u )
     implicit none
     real(8),intent(IN) :: Etot
-    logical,intent(IN) :: flag_write, flag_rewind
-    integer,parameter :: u=99
+    logical,intent(IN) :: flag_write
+    integer,intent(IN) :: u
     if ( flag_write ) then
-       if ( flag_rewind ) rewind u
+       if ( u == 6 ) then
+          call write_border( 0, " total energy" )
+       else
+          rewind u
+       end if
        write(u,*) "Total Energy ",Etot
        write(u,*) "Harris Energy",Ehwf
        write(u,*) "Ion-Ion                    ",Eewald
@@ -356,6 +363,7 @@ CONTAINS
        write(u,*) "Correlation Energy         ",E_correlation
        write(u,*) "Sum of eigenvalues         ",Eeig
        write(u,*) "Fermi energy               ",efermi
+       if ( u == 6 ) call write_border( 0, "" )
     end if
 !    u(:) = (/ 6, 99 /)
 !    do i=1,2

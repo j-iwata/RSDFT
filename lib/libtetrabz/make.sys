@@ -1,0 +1,16 @@
+
+TOPDIR = /home/usr/libtetrabz/
+
+#
+# for Intel 
+#
+F90 = ifort
+MPIF90 = mpiifort
+FFLAGS  = -xHost -openmp -traceback
+
+#
+# for gfortran
+#
+#MPIF90 = mpif90
+#F90 = gfortran
+#FFLAGS  = -O3 -fopenmp -fbacktrace

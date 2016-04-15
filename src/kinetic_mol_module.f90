@@ -17,12 +17,14 @@ CONTAINS
 #ifdef _DRSDFT_
     real(8),intent(IN)    ::  tpsi(n1:n2,ib1:ib2)
     real(8),intent(INOUT) :: htpsi(n1:n2,ib1:ib2)
+    real(8) :: d
 #else
     complex(8),intent(IN)    ::  tpsi(n1:n2,ib1:ib2)
     complex(8),intent(INOUT) :: htpsi(n1:n2,ib1:ib2)
+    complex(8) :: d
 #endif
     integer :: i,ib,i1,i2,i3,m,n
-    real(8) :: c,d
+    real(8) :: c
 
     do ib=ib1,ib2
 !$OMP do

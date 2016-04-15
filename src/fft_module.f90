@@ -2,6 +2,7 @@ MODULE fft_module
 
   use grid_module
   use rsdft_fft_module
+  use fftw_module
 
   implicit none
 
@@ -28,7 +29,7 @@ CONTAINS
     implicit none
     logical,optional,intent(IN) :: keep_flag
     call get_range_rgrid( rgrid )
-    if ( .not.keep_LLL ) call get_map_3d_to_1d( LLL )
+    if ( .not.keep_LLL ) call get_map_3d_to_1d_grid( rgrid, LLL )
     ML  = rgrid%g1%size_global
     ML1 = rgrid%g3%x%size_global
     ML2 = rgrid%g3%y%size_global
@@ -138,6 +139,10 @@ CONTAINS
     implicit none
     complex(8),intent(INOUT) :: z3(0:,0:,0:)
     complex(8),allocatable   :: w3(:,:,:)
+#ifdef _FFTW_
+    call forward_fftw( z3 )
+    return
+#endif
     if ( .not.allocated(w3) ) then
        allocate( w3(0:ML1-1,0:ML2-1,0:ML3-1) ) ; w3=zero
     end if
@@ -151,6 +156,10 @@ CONTAINS
     implicit none
     complex(8),intent(INOUT) :: z3(:,:,:)
     complex(8),allocatable   :: w3(:,:,:)
+#ifdef _FFTW_
+    call backward_fftw( z3 )
+    return
+#endif
     if ( .not.allocated(w3) ) then
        allocate( w3(0:ML1-1,0:ML2-1,0:ML3-1) ) ; w3=zero
     end if

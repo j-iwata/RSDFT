@@ -1,0 +1,685 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" 
+          content="text/html; charset=utf-8">
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+    </script>
+    <script type="text/javascript"
+            src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML">
+    </script>
+    <meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+    
+    <title>Manual for libtetrabz</title>
+    
+    <meta name="description" content="Manual for libtetrabz">
+    
+  </head>
+  <body bgcolor="CCFFCC">
+    
+    <center><h1>Manual for libtetrabz</h1></center>
+    <center><h2>Version 1.0.1</h2></center>
+    <center><h2>Mitsuaki Kawamura</h2></center>
+
+    <hr>
+    <h1><a name="hajimeni">Introduction</a></h1>
+
+    <p>This docment explain a tetrahedron method library <code>libtetrabz</code>. 
+      <code>libtetrabz</code> is a library to calculate the total energy, the charge density,
+      partial density of states, respons functions, etc. in a solid
+      by using the optimized tetrahedron method <a href="#cite">[1]</a>.
+      A subroutines in this library recieves the orbital (Kohn-Sham) energies as an input 
+      and calculates weights $w_{n n' k}$ for integration such as
+    <p>$$
+      \begin{aligned}
+        \sum_{n n' k} F(\varepsilon_{n k}, \varepsilon_{n' k+q})X_{n n' k}
+        =
+        \sum_{n n' k} w_{n n' k} X_{n n' k}\end{aligned}.
+      $$</p>
+    <p>
+      <code>libtetrabz</code> supports following Brillouin-zone integrations</p>
+    <p>$$
+      \begin{aligned}
+      &amp;\sum_{n k} \theta(\varepsilon_{\rm F} - \varepsilon_{n k}) X_{n k}
+      \\
+      &amp;\sum_{n k} \delta(\omega - \varepsilon_{n k}) X_{n k}(\omega)
+      \\
+      &amp;\sum_{n n' k} \delta(\varepsilon_{\rm F} - \varepsilon_{n k})
+      \delta(\varepsilon_{\rm F} - \varepsilon'_{n' k})
+      \\
+      &amp;\sum_{n n' k} \theta(\varepsilon_{\rm F} - \varepsilon_{n k})
+      \theta(\varepsilon_{n k} - \varepsilon'_{n' k})
+      \\
+      &amp;\sum_{n n' k} \frac{\theta(\varepsilon_{\rm F} - \varepsilon_{n k})
+      \theta(\varepsilon'_{n' k} - \varepsilon_{\rm F})}
+      {\varepsilon'_{n' k} - \varepsilon_{n k}} X_{n n' k}
+      \\
+      &amp;\sum_{n n' k} \theta(\varepsilon_{\rm F} - \varepsilon_{n k})
+      \theta(\varepsilon'_{n' k} - \varepsilon_{\rm F})
+      \delta(\varepsilon'_{n' k} - \varepsilon_{n k} - \omega) X_{n n' k}(\omega)
+      \\
+      &amp;\sum_{n n' k} \frac{\theta(\varepsilon_{\rm F} - \varepsilon_{n k})
+      \theta(\varepsilon'_{n' k} - \varepsilon_{\rm F})}
+      {\varepsilon'_{n' k} - \varepsilon_{n k} + i \omega} X_{n n' k}(\omega)
+      \end{aligned}
+      $$</p>
+
+    <hr>
+    <h1><a name="mitlicense">2, MIT license</a></h1>
+
+    <p>Copyright (c) 2014 Mitsuaki Kawamura</p>
+    <p>Permission is hereby granted, free of charge, 
+      to any person obtaining a copy of this software and associated documentation files 
+      (the "Software"), to deal in the Software without restriction, 
+      including without limitation the rights to use, copy, modify, merge, publish, 
+      distribute, sublicense, and/or sell copies of the Software, 
+      and to permit persons to whom the Software is furnished to do so, 
+      subject to the following conditions:</p>
+    <p>The above copyright notice and this permission notice shall be included 
+      in all copies or substantial portions of the Software.</p>
+    <p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
+      EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+      FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS 
+      OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER 
+      IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
+      ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
+      OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+
+    <hr>
+    <h1><a name="installation">Instalation</a></h1>
+
+    <hr>
+    <h2><a name="filesinthispackage">3.1, Files in this package</a></h2>
+
+    <p><code>doc/manual_en.html</code> : Manual in English (This file)</p>
+    <p><code>doc/manual_jp.html</code> : Manual in Japanese</p>
+    <p><code>examples/</code> : Sample programs using <code>libtetrabz</code></p>
+    <p><code>src/</code> : source files</p>
+    <p><code>Makefile</code>, <code>make.sys</code> : Make file and the configuretion file</p>
+    
+    <hr>
+    <h2><a name="youken">3.2, Prerequisite</a></h2>
+    
+    <p><code>libtetrabz</code> requires the following</p>
+    <ul>
+      <li><p>fortran compiler</p></li>
+      <li><p>MPI library (If you use MPI/Hybrid version)</p></li>
+    </ul>
+    
+    <hr>
+    <h2><a name="installtejun">3.3, Instalation guide</a></h2>
+    <ol>
+      <li><p>Download <code>.tar.gz</code> file from following web page.</p>
+        <pre><code>
+http://osdn.jp/projects/libtetrabz/releases/
+        </code></pre>
+      </li>
+      <li><p>Uncompress <code>.tar.gz</code> file and enter the generated directory.</p>
+        <pre><code>
+$ tar xzvf xzvf libtetrabz_1.0.1.tar.gz
+$ cd libtetrabz
+        </code></pre>
+      </li>
+      <li><p>Modify <code>make.sys</code> for your platform.
+          Adjust the following variables:</p>
+        <p><code>TOPDIR</code> : Path to the <code>libtetrabz</code> top directory</p>
+        <p><code>F90</code> : Fortran compile command (for serial version) (gfortran, ifort, frt, etc.)</p>
+        <p><code>MPIF90</code> : MPI-fortran compile command (mpif90, mpiifort, mpifrt, etc.)</p>
+        <p><code>FFLAGS</code> : fortran compile option</p>
+      </li>
+      <li><p>Compile.</p>
+        <pre><code>$ make </code></pre>
+        <p>If it succeed, you obtain the following files in <code>src/</code></p>
+        <pre><code>
+libtetrabz.a
+libtetrabz.mod
+libtetrabz_mpi.a
+libtetrabz_mpi.mod
+        </code></pre>
+        <p>* If you do not need the MPI version, <code>make</code> serial version only.</p>
+        <pre><code>
+$ cd src
+$ make libtetrabz.a
+        </code></pre>
+      </li>
+    </ol>
+
+    <br>
+    <p>Sample programs using <code>libtetrabz</code> are also compiled in <code>example/<code> .</p>
+    <p><code>example/dos.x</code> : Compute DOS of a tightbinding model in the cubic lattice.
+      The source code is <code>dos.f90</code></p>
+    <p><code>example/lindhard.x</code> : Compute the Lindhard function.
+      The source code is <code>lindhard.f90</code></p>
+
+    <p><img src="dos.jpg" align="middle" width="400" alt="DOS"/>
+      Figure 1: Density of states of the tight-binding model on the cubic lattice
+      calculated by using <code>dos.x</code>
+      The solid line indicates the result converged about the number of $k$.
+      &ldquo;$+$&rdquo; and &ldquo;$\times$&rdquo;indicate results by using
+      the linear tetrahedron method and the optimized tetrahedron method, respectively
+      with $8\times8\times8 k$ grid.</p>
+    <p><img src="lindhard.jpg" align="middle" width="400" alt="Lindhard"/>
+      Figure 2: (solid line) The analytical result of the Lindhard function. 
+      &ldquo;$+$&rdquo; and &ldquo;$\times$&rdquo;indicate results by using
+      the linear tetrahedron method and the optimized tetrahedron method, respectively
+      with $8\times8\times8 k$ grid.</p>
+
+    <hr>
+    <h1><a name="linklibrary">4, Linking libtetrabz</a></h1>
+
+    <p><span><strong>e. g. / For intel fortran</strong></span><br />
+      <pre><code>
+$ ifort program.f90 -L {libtetrabz path}/src/ -I {libtetrabz path}/src -ltetrabz -fopenmp
+$ mpiifort program.f90 -L {libtetrabz path}/src/  -I {libtetrabz path}/src -ltetrabz_mpi -fopenmp
+      </code></pre>
+
+    <p><span><strong>e. g. / For intel C</strong></span><br />
+     <pre><code>
+$ icc -lifcore program.f90 -L libtetrabz path}/src/ -I libtetrabz path}/src -ltetrabz -fopenmp
+$ mpiicc -lifcore program.f90 -L libtetrabz path}/src/  -I libtetrabz path}/src -ltetrabz_mpi -fopenmp
+      </code></pre>
+
+
+    <p>where <code>{libtetrabz path}</code> means the path 
+      to the top directory of <code>libtetrabz</code>.
+      If you perform followin setting, you do not need <code>-L</code> and <code>-I</code> option.</p>
+    <ul>
+      <li>Copy <p><code>.a</code> files to a directory in <code>$LIBRALLY_PATH</code>.</p></li>
+      <li>Copy <p><code>.mod</code> files to a directory in <code>$INCLUDE</code>.</p></li>
+    </ul>
+
+    <hr>
+    <h1><a name="subroutines">5, Subroutines</a></h1>
+    
+    <p>You can call a subroutine in this library as follows:</p>
+    <pre><code>
+use libtetrabz, only : libtetrabz_occ
+ :
+call libtetrabz_occ(ltetra,bvec,nb,nge,eig,ngw,wght)
+    </code></pre>
+    <p>Every subroutine has a name starts from <code>libtetrabz_</code>. 
+      MPI version has a name starts from <code>libtetrabz_mpi_</code>
+      and it requires <code>use libtetrabz_mpi</code>. 
+      The difference of argumentsv between the serial version and the MPI version
+      is an integer input argument <code>comm</code> which specifies the communicator.</p>
+
+
+    For the C program, it can be used as follows:
+    <pre><code>
+#include "libtetrabz.h"
+ :
+libtetrabz_mp_libtetrabz_occ_(&amp;ltetra,bvec,&amp;nb,nge,eig,ngw,wght)
+    </code></pre>
+    The name of a function in C becomes <code>libtetrabz_mp_</code> + 
+    fortran subroutine name + <code>_</code>.
+    For the MPI version, <code>libtetrabz_mpi.h</code> should be included,
+    and the name of a function becomes <code>libtetrabz_mpi_mp_</code> + 
+    fortran subroutine name + <code>_</code>.
+    Variables should be passed as pointers.
+    Arrays should be declared as one dimentional arrays;
+
+    <hr>
+    <h2><a name="totalenergy">5.1, Total energy, charge density, occupations</a></h2>
+    <p>
+      $$\begin{aligned}
+        \sum_{n k} \theta(\varepsilon_{\rm F} - \varepsilon_{n k}) X_{n k}
+      \end{aligned}$$
+    </p>
+    <pre><code>
+subroutine libtetrabz_occ(ltetra,bvec,nb,nge,eig,ngw,wght)
+  integer,intent(in) :: ltetra, nge(3), ngw(3), nb
+  real(8),intent(in) :: bvec(3,3)
+  real(8),intent(in) :: eig(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_occ
+
+subroutine libtetrabz_mpi_occ(ltetra,comm,bvec,nb,nge,eig,ngw,wght)
+  integer,intent(in) :: ltetra, comm, nge(3), ngw(3), nb
+  real(8),intent(in) :: bvec(3,3)
+  real(8),intent(in) :: eig(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_mpi_occ
+    </code></pre>
+
+    <p><code>ltetra</code> : (input, integer) Specify the type of the tetrahedron method.
+      1 $\cdots$ The linear tetrahedron method. 2 $\cdots$ the optimized tetrahedron method.</p>
+    <p><code>comm</code> : (input, integer) Only for MPI version. Specify the communicator.</p>
+    <p><code>bvec(3,3)</code> : (input, real array) Reciplocal lattice vectors (arbitrary unit).
+      Because they are used to choose the direction of tetrahedra,
+      only their ratio is used.</p>
+    <p><code>nb</code> : (input, integer) The number of bands</p>
+    <p><code>nge(3)</code> : (input, integer array) Specify the $k$-grid for input orbital energy.</p>
+    <p><code>eig(nb,nge(1),nge(2),nge(3))</code> : (input, real array) The orbital energy 
+      mesured from the Fermi energy ($\varepsilon_{\rm F} = 0$).</p>
+    <p><code>ngw(3)</code> : (input, integer array) Specify the $k$-grid for output integration weights. 
+      You can make <code>ngw</code>$\neq$<code>nge</code> (See Appendix).</p>
+    <p><code>wght(nb,ngw(1),ngw(2),ngw(3))</code> : (output, real array) integration weights</p>
+
+    <hr>
+    <h2><a name="fermienergy">5.2, Fermi energy and occupations</a></h2>
+    <p>
+      $$\begin{aligned}
+        &amp;\sum_{n k} \theta(\varepsilon_{\rm F} - \varepsilon_{n k}) X_{n k}
+      \end{aligned}$$
+    </p>
+    <pre><code>
+subroutine libtetrabz_fermieng(ltetra,bvec,nb,nge,eig,ngw,wght,ef,nelec)
+  integer,intent(in) :: ltetra, nge(3), ngw(3), nb
+  real(8),intent(in) :: bvec(3,3), nelec
+  real(8),intent(in) :: eig(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: ef
+  real(8),intent(out) :: wght(nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_fermieng
+
+subroutine libtetrabz_mpi_fermieng(ltetra,comm,bvec,nb,nge,eig,ngw,wght,ef,nelec)
+  integer,intent(in) :: ltetra, comm, nge(3), ngw(3), nb
+  real(8),intent(in) :: bvec(3,3), nelec
+  real(8),intent(in) :: eig(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: ef
+  real(8),intent(out) :: wght(nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_mpi_fermieng
+    </code></pre>
+    <p><code>ltetra</code> :  (input, integer)Specify the type of the tetrahedron method.
+      1 $\cdots$ The linear tetrahedron method. 2 $\cdots$ the optimized tetrahedron method.</p>
+    <p><code>comm</code> :  (input, integer) Only for MPI version. Specify the communicator.</p>
+    <p><code>bvec(3,3)</code> :  (input, real array) Reciplocal lattice vectors (arbitrary unit).
+      Because they are used to choose the direction of tetrahedra,
+      only their ratio is used.</p>
+    <p><code>nb</code> :  (input, integer)The number of bands</p>
+    <p><code>nge(3)</code> :  (input, integer array) Specify the $k$-grid for input orbital energy.</p>
+    <p><code>eig(nb,nge(1),nge(2),nge(3))</code> :  (input, real array) The orbital energy..</p>
+    <p><code>ngw(3)</code> :  (input, integer array) Specify the $k$-grid for output integration weights. 
+      You can make <code>ngw</code>$\neq$<code>nge</code> (See Appendix).</p>
+    <p><code>wght(nb,ngw(1),ngw(2),ngw(3))</code> :  (output, real array) integration weights</p>
+    <p><code>ef</code> :  (output, real) The Fermi energy</p>
+    <p><code>nelec</code> : The number of (valence) electrons per spin</p>
+
+    <hr>
+    <h2><a name="partialdos">5.3, Partial density of states</a></h2>
+
+    <p>
+      $$\begin{aligned}
+        &amp;\sum_{n k} \delta(\omega - \varepsilon_{n k}) X_{n k}(\omega)
+      \end{aligned}$$
+    </p>
+    <pre><code>
+subroutine libtetrabz_dos(ltetra,bvec,nb,nge,eig,ngw,wght,ne,e0)
+  integer,intent(in) :: ltetra, nge(3), ngw(3), nb, ne
+  real(8),intent(in) :: bvec(3,3), e0(ne)
+  real(8),intent(in) :: eig(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(ne,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_dos
+
+subroutine libtetrabz_mpi_dos(ltetra,comm,bvec,nb,nge,eig,ngw,wght,ne,e0)
+  integer,intent(in) :: ltetra, comm, nge(3), ngw(3), nb, ne
+  real(8),intent(in) :: bvec(3,3), e0(ne)
+  real(8),intent(in) :: eig(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(ne,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_mpi_dos
+    </code></pre>
+
+    <p><code>ltetra</code> :  (input, integer)Specify the type of the tetrahedron method.
+      1 $\cdots$ The linear tetrahedron method. 2 $\cdots$ the optimized tetrahedron method.</p>
+    <p><code>comm</code> :  (input, integer) Only for MPI version. Specify the communicator.</p>
+    <p><code>bvec(3,3)</code> :  (input, real array) Reciplocal lattice vectors (arbitrary unit).
+      Because they are used to choose the direction of tetrahedra,
+      only their ratio is used.</p>
+    <p><code>nb</code> :  (input, integer)The number of bands</p>
+    <p><code>nge(3)</code> :  (input, integer array) Specify the $k$-grid for input orbital energy.</p>
+    <p><code>eig(nb,nge(1),nge(2),nge(3))</code> :  (input, real array) The orbital energy..</p>
+    <p><code>ngw(3)</code> :  (input, integer array) Specify the $k$-grid for output integration weights. 
+      You can make <code>ngw</code>$\neq$<code>nge</code> (See Appendix).</p>
+    <p><code>wght(ne,nb,ngw(1),ngw(2),ngw(3))</code> :  (output, real array) integration weights</p>
+    <p><code>ne</code> :  (input, integer) The number of energy where DOS is calcuated.</p>
+    <p><code>e0(ne)</code> :  (input, real array) Energies where DOS is calcuated.</p>
+
+    <hr>
+    <h2><a name="nesting">5.4, Nesting function and Fr&oumlhlich parameter</a></h2>
+    <p>
+      $$\begin{aligned}
+      &amp;\sum_{n n' k} \delta(\varepsilon_{\rm F} - \varepsilon_{n k})
+      \delta(\varepsilon_{\rm F} - \varepsilon'_{n' k})
+      \end{aligned}$$
+    </p>
+    <pre><code>
+subroutine libtetrabz_doubledelta(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght)
+  integer,intent(in) :: ltetra, nge(3), ngw(3), nb
+  real(8),intent(in) :: bvec(3,3)
+  real(8),intent(in) :: eig1(nb,nge(1),nge(2),nge(3)), eig2(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(nb,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_doubledelta
+
+subroutine libtetrabz_mpi_doubledelta(ltetra,comm,bvec,nb,nge,eig1,eig2,ngw,wght)
+  integer,intent(in) :: ltetra, comm0, nge(3), ngw(3), nb
+  real(8),intent(in) :: bvec(3,3)
+  real(8),intent(in) :: eig1(nb,nge(1),nge(2),nge(3)), eig2(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(nb,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_mpi_doubledelta
+    </code></pre>
+    
+    <p><code>ltetra</code> :  (input, integer)Specify the type of the tetrahedron method.
+      1 $\cdots$ The linear tetrahedron method. 2 $\cdots$ the optimized tetrahedron method.</p>
+    <p><code>comm</code> :  (input, integer) Only for MPI version. Specify the communicator.</p>
+    <p><code>bvec(3,3)</code> :  (input, real array) Reciplocal lattice vectors (arbitrary unit).
+      Because they are used to choose the direction of tetrahedra,
+      only their ratio is used.</p>
+    <p><code>nb</code> :  (input, integer)The number of bands</p>
+    <p><code>nge(3)</code> :  (input, integer array) Specify the $k$-grid for input orbital energy.</p>
+    <p><code>eig1(nb,nge(1),nge(2),nge(3))</code> :  (input, real array) The orbital energy 
+      mesured from the Fermi energy ($\varepsilon_{\rm F} = 0$). Do the same with <code>eig2</code>.</p>
+    <p><code>eig2(nb,nge(1),nge(2),nge(3))</code> :  (input, real array) Another orbital energy.
+      E. g. $\varepsilon_{k + q}$ on a shifted grid.</p>
+    <p><code>ngw(3)</code> :  (input, integer array) Specify the $k$-grid for output integration weights. 
+      You can make <code>ngw</code>$\neq$<code>nge</code> (See Appendix).</p>
+    <p><code>wght(nb,nb,ngw(1),ngw(2),ngw(3))</code> :  (output, real array) integration weights</p>
+    
+    <hr>
+    <h2><a name="occstep">5.5, A part of DFPT calculation</a></h2>
+    <p>
+      $$\begin{aligned}
+      &amp;\sum_{n n' k} \theta(\varepsilon_{\rm F} - \varepsilon_{n k})
+      \theta(\varepsilon_{n k} - \varepsilon'_{n' k})
+      \end{aligned}$$
+    </p>
+    <pre><code>
+subroutine libtetrabz_occstep(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght)
+integer,intent(in) :: ltetra, nge(3), ngw(3), nb
+  real(8),intent(in) :: bvec(3,3)
+  real(8),intent(in) :: eig1(nb,nge(1),nge(2),nge(3)), eig2(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(nb,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_occstep
+
+subroutine libtetrabz_mpi_occstep(ltetra,comm0,bvec,nb,nge,eig1,eig2,ngw,wght)
+  integer,intent(in) :: ltetra, comm0, nge(3), ngw(3), nb
+  real(8),intent(in) :: bvec(3,3)
+  real(8),intent(in) :: eig1(nb,nge(1),nge(2),nge(3)), eig2(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(nb,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_mpi_occstep
+    </code></pre>
+
+    <p><code>ltetra</code> :  (input, integer)Specify the type of the tetrahedron method.
+      1 $\cdots$ The linear tetrahedron method. 2 $\cdots$ the optimized tetrahedron method.</p>
+    <p><code>comm</code> :  (input, integer) Only for MPI version. Specify the communicator.</p>
+    <p><code>bvec(3,3)</code> :  (input, real array) Reciplocal lattice vectors (arbitrary unit).
+      Because they are used to choose the direction of tetrahedra,
+      only their ratio is used.</p>
+    <p><code>nb</code> :  (input, integer)The number of bands</p>
+    <p><code>nge(3)</code> :  (input, integer array) Specify the $k$-grid for input orbital energy.</p>
+    <p><code>eig1(nb,nge(1),nge(2),nge(3))</code> :  (input, real array) The orbital energy 
+      mesured from the Fermi energy ($\varepsilon_{\rm F} = 0$). Do the same with <code>eig2</code>.</p>
+    <p><code>eig2(nb,nge(1),nge(2),nge(3))</code> :  (input, real array) The orbital energy.. 
+      E. g. $\varepsilon_{k + q}$ on a shifted grid.</p>
+    <p><code>ngw(3)</code> :  (input, integer array) Specify the $k$-grid for output integration weights. 
+      You can make <code>ngw</code>$\neq$<code>nge</code> (See Appendix).</p>
+    <p><code>wght(nb,nb,ngw(1),ngw(2),ngw(3))</code> :  (output, real array) integration weights</p>
+
+    <hr>
+    <h2><a name="polstat">5.6, Static polarization function</a></h2>
+   
+    <p>
+      $$\begin{aligned}
+      &amp;\sum_{n n' k} \frac{\theta(\varepsilon_{\rm F} - \varepsilon_{n k})
+      \theta(\varepsilon'_{n' k} - \varepsilon_{\rm F})}
+      {\varepsilon'_{n' k} - \varepsilon_{n k}} X_{n n' k}
+      \end{aligned}$$
+    </p>
+    <pre><code>
+subroutine libtetrabz_polstat(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght)
+  integer,intent(in) :: ltetra, nge(3), ngw(3), nb
+  real(8),intent(in) :: bvec(3,3)
+  real(8),intent(in) :: eig1(nb,nge(1),nge(2),nge(3)), eig2(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(nb,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_polstat
+
+subroutine libtetrabz_mpi_polstat(ltetra,comm0,bvec,nb,nge,eig1,eig2,ngw,wght)
+  integer,intent(in) :: ltetra, comm0, nge(3), ngw(3), nb
+  real(8),intent(in) :: bvec(3,3)
+  real(8),intent(in) :: eig1(nb,nge(1),nge(2),nge(3)), eig2(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(nb,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_mpi_polstat
+    </code></pre>
+
+    <p><code>ltetra</code> :  (input, integer)Specify the type of the tetrahedron method.
+      1 $\cdots$ The linear tetrahedron method. 2 $\cdots$ the optimized tetrahedron method.</p>
+    <p><code>comm</code> :  (input, integer) Only for MPI version. Specify the communicator.</p>
+    <p><code>bvec(3,3)</code> :  (input, real array) Reciplocal lattice vectors (arbitrary unit).
+      Because they are used to choose the direction of tetrahedra,
+      only their ratio is used.</p>
+    <p><code>nb</code> :  (input, integer)The number of bands</p>
+    <p><code>nge(3)</code> :  (input, integer array) Specify the $k$-grid for input orbital energy.</p>
+    <p><code>eig1(nb,nge(1),nge(2),nge(3))</code> :  (input, real array) The orbital energy 
+      mesured from the Fermi energy ($\varepsilon_{\rm F} = 0$). Do the same with <code>eig2</code>.</p>
+    <p><code>eig2(nb,nge(1),nge(2),nge(3))</code> :  (input, real array) The orbital energy.. 
+      E. g. $\varepsilon_{k + q}$ on a shifted grid.</p>
+    <p><code>ngw(3)</code> :  (input, integer array) Specify the $k$-grid for output integration weights. 
+      You can make <code>ngw</code>$\neq$<code>nge</code> (See Appendix).</p>
+    <p><code>wght(nb,nb,ngw(1),ngw(2),ngw(3))</code> :  (output, real array) integration weights</p>
+    
+    <hr>
+    <h2><a name="linewidth">5.7, Phonon linewidth</a></h2>
+    <p>
+      $$\begin{aligned}
+      &amp;\sum_{n n' k} \theta(\varepsilon_{\rm F} - \varepsilon_{n k})
+      \theta(\varepsilon'_{n' k} - \varepsilon_{\rm F})
+      \delta(\varepsilon'_{n' k} - \varepsilon_{n k} - \omega) X_{n n' k}(\omega)
+      \end{aligned}$$
+    </p>
+    
+    <pre><code>
+subroutine libtetrabz_fermigr(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,ne,e0)
+  integer,intent(in) :: ltetra, nge(3), ngw(3), nb, ne
+  real(8),intent(in) :: bvec(3,3), e0(ne)
+  real(8),intent(in) :: eig1(nb,nge(1),nge(2),nge(3)), eig2(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(ne,nb,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_fermigr
+
+subroutine libtetrabz_mpi_fermigr(ltetra,comm0,bvec,nb,nge,eig1,eig2,ngw,wght,ne,e0)
+  integer,intent(in) :: ltetra, comm0, nge(3), ngw(3), nb, ne
+  real(8),intent(in) :: bvec(3,3), e0(ne)
+  real(8),intent(in) :: eig1(nb,nge(1),nge(2),nge(3)), eig2(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(ne,nb,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_mpi_fermigr
+    </code></pre>
+    
+    <p><code>ltetra</code> :  (input, integer) Specify the type of the tetrahedron method.
+      1 $\cdots$ The linear tetrahedron method. 2 $\cdots$ the optimized tetrahedron method.</p>
+    <p><code>comm</code> :  (input, integer) Only for MPI version. Specify the communicator.</p>
+    <p><code>bvec(3,3)</code> :  (input, real array) Reciplocal lattice vectors (arbitrary unit).
+      Because they are used to choose the direction of tetrahedra,
+      only their ratio is used.</p>
+    <p><code>nb</code> :  (input, integer)The number of bands</p>
+    <p><code>nge(3)</code> :  (input, integer array) Specify the $k$-grid for input orbital energy.</p>
+    <p><code>eig1(nb,nge(1),nge(2),nge(3))</code> : (input, real array)The orbital energy 
+      mesured from the Fermi energy ($\varepsilon_{\rm F} = 0$). Do the same with <code>eig2</code>.</p>
+    <p><code>eig2(nb,nge(1),nge(2),nge(3))</code> :  (input, real array) Another orbital energy. 
+      E. g. $\varepsilon_{k + q}$ on a shifted grid.</p>
+    <p><code>ngw(3)</code> :  (input, integer array) Specify the $k$-grid for output integration weights. 
+      You can make <code>ngw</code>$\neq$<code>nge</code> (See Appendix).</p>
+    <p><code>wght(ne,nb,nb,ngw(1),ngw(2),ngw(3))</code> :  (output, real array) integration weights</p>
+    <p><code>ne</code> :  (input, integer) The number of branches of the phonon</p>
+    <p><code>e0(ne)</code> :  (input, real array) Phonon frequencies</p>
+
+    <hr>
+    <h2><a name="polimg">5.8, Polarization function (imaginaly frequency)</a></h2>
+    <p>
+      $$\begin{aligned}
+      &amp;\sum_{n n' k} \frac{\theta(\varepsilon_{\rm F} - \varepsilon_{n k})
+      \theta(\varepsilon'_{n' k} - \varepsilon_{\rm F})}
+      {\varepsilon'_{n' k} - \varepsilon_{n k} + i \omega} X_{n n' k}(\omega)
+      \end{aligned}$$
+    </p>
+    <pre><code>
+subroutine libtetrabz_polimg(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,ne,e0)
+  integer,intent(in) :: ltetra, nge(3), ngw(3), nb, ne
+  real(8),intent(in) :: bvec(3,3), e0(ne)
+  real(8),intent(in) :: eig1(nb,nge(1),nge(2),nge(3)), eig2(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(2,ne,nb,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_polimg
+
+subroutine libtetrabz_mpi_polimg(ltetra,comm0,bvec,nb,nge,eig1,eig2,ngw,wght,ne,e0)
+  integer,intent(in) :: ltetra, comm0, nge(3), ngw(3), nb, ne
+  real(8),intent(in) :: bvec(3,3), e0(ne)
+  real(8),intent(in) :: eig1(nb,nge(1),nge(2),nge(3)), eig2(nb,nge(1),nge(2),nge(3))
+  real(8),intent(out) :: wght(2,ne,nb,nb,ngw(1),ngw(2),ngw(3))
+end subroutine libtetrabz_mpi_polimg
+    </code></pre>
+    
+    <p><code>ltetra</code> :  (input, integer)Specify the type of the tetrahedron method.
+      1 $\cdots$ The linear tetrahedron method. 2 $\cdots$ the optimized tetrahedron method.</p>
+    <p><code>comm</code> :  (input, integer) Only for MPI version. Specify the communicator.</p>
+    <p><code>bvec(3,3)</code> :  (input, real array) Reciplocal lattice vectors (arbitrary unit).
+      Because they are used to choose the direction of tetrahedra,
+      only their ratio is used.</p>
+    <p><code>nb</code> :  (input, integer)The number of bands</p>
+    <p><code>nge(3)</code> :  (input, integer array) Specify the $k$-grid for input orbital energy.</p>
+    <p><code>eig1(nb,nge(1),nge(2),nge(3))</code> :  (input, real array) The orbital energy 
+      mesured from the Fermi energy ($\varepsilon_{\rm F} = 0$). Do the same with <code>eig2</code>.</p>
+    <p><code>eig2(nb,nge(1),nge(2),nge(3))</code> :  (input, real array) Another orbital energy. 
+      E. g. $\varepsilon_{k + q}$ on a shifted grid.</p>
+    <p><code>ngw(3)</code> :  (input, integer array) Specify the $k$-grid for output integration weights. 
+      You can make <code>ngw</code>$\neq$<code>nge</code> (See Appendix).</p>
+    <p><code>wght(2,ne,nb,nb,ngw(1),ngw(2),ngw(3))</code> :  (output, real array) integration weights. 
+      The first dimension means the real part and the imaginary part of weights.</p>
+    <p><code>ne</code> :  (input, integer) The number of imaginary frequencies
+      where polaization functions are calculated.</p>
+    <p><code>e0(ne)</code> :  (input, real array) Imaginary frequencies
+      where polaization functions are calculated.</p>
+
+    <hr>
+    <h1><a name="samplecode">6, A part of the sample code</a></h1>
+    <p>This sample shows the calculation of the charge density.</p>
+    <p>
+      $$\begin{aligned}
+      \rho(r) = 2 \sum_{n k} \theta(\varepsilon_{\rm F} - \varepsilon_{n k}) |\varphi_{n k}(r)|^2
+      \end{aligned}$$
+    </p>
+    <pre><code>
+subroutin calc_rho(nr,nb,ng,nelec,bvec,eig,ef,phi,rho)
+  !
+  use libtetrabz, only : libtetrabz_fermieng
+  implicit none
+  !
+  integer,intent(in) :: nr ! number of r
+  integer,intent(in) :: nb ! number of bands
+  integer,intent(in) :: ng(3)
+  ! k-point mesh
+  real(8),intent(in) :: nelec ! number of electrons per spin
+  real(8),intent(in) :: bvec(3,3) ! reciplocal lattice vector
+  real(8),intent(in) :: eig(nb,ng(1),ng(2),ng(3)) ! Kohn-Sham eigenvalues
+  real(8),intent(out) :: ef ! Fermi energy
+  complex(8),intent(in) :: phi(nr,nb,ng(1),ng(2),ng(3)) ! Kohn-Sham orbitals
+  real(8),intent(out) :: rho(nr) ! Charge density
+  !
+  integer :: ib, i1, i2, i3, ltetra
+  real(8) :: wght(nb,ng(1),ng(2),ng(3))
+  !
+  ltetra = 2
+  !
+  call libtetrabz_fermieng(ltetra,bvec,nb,ng,eig,ng,wght,ef,nelec)
+  !
+  rho(1:nr) = 0d0
+  do i1 = 1, ng(3)
+     do i2 = 1, ng(2)
+        do i1 = 1, ng(1)
+           do ib = 1, nb
+              rho(1:nr) = rho(1:nr) + 2d0 * wght(ib,i1,i2,i3) &amp;
+              &amp;     * dble(conjg(phi(1:nr,ib,i1,i2,i3)) * phi(1:nr,ib,i1,i2,i3))
+           end do
+        end do
+     end do
+  end do
+  !
+end subroutin calc_rho
+    </code></pre>
+    
+    <hr>    
+    <h1><a name="contact">7, Contacts</a></h1>
+
+    <p>Please post bag reports and questions to the forum</p>
+    <pre><code>
+http://sourceforge.jp/projects/fermisurfer/forums/
+    </code></pre>
+    <p>When you want to join us, please contact me as follows.</p>
+    <p>The Institute of Solid State Physics</p>
+    <p>Mitsuaki Kawamura</p>
+    <p><code>mkawamura__at__issp.u-tokyo.ac.jp</code></p>
+
+    <hr>
+    <h1><a name="interpolation">Appendix 1, Inverse interpolation</a></h1>
+    <p>We consider an integration as follows: </p>
+    <p>
+      $$\begin{aligned}
+      \langle X \rangle = \sum_{k} X_k w(\varepsilon_k).
+      \end{aligned}$$
+    </p>
+    <p>If this integration has conditions that </p>
+    <ul>
+      <li><p>$w(\varepsilon_k)$ is sensitive to $\varepsilon_k$
+          (e. g. the stepfunction, the delta function, etc.) 
+          and requires $\varepsilon_k$ on a dense $k$ grid, and
+      </p></li>
+      <li><p>the numerical cost to obtain $X_k$ is much larger the const for $\varepsilon_k$ 
+          (e. g. the polarization function),</p></li>
+    </ul>
+    <p>it is efficient to interpolate $X_k$ into a denser $k$ grid and 
+      evaluate that integration in a dense $k$ grid. 
+      This method is parformed as follows: </p>
+    <ol>
+      <li><p>Calculate $\varepsilon_k$ on a dense $k$grid.</p></li>
+      <li><p>Calcuate $X_k$ on a coarse $k$ grid and
+          obtain that on a dense $k$ grid by using the linear interpolation, 
+          the polynomial interpolation, the spline interpolation, etc.
+        <p>
+          $$\begin{aligned}
+          X_k^{\rm dense} = \sum_{k'}^{\rm coarse} F_{k k'} X_{k'}^{\rm coarse}
+          \end{aligned}$$
+        </p>
+      </li>
+      <li><p>Evaluate that integration in the dense $k$ grid.</p>
+        <p>
+          $$\begin{aligned}
+          \langle X \rangle = \sum_{k}^{\rm dense} X_k^{\rm dense} w_k^{\rm dense}
+          \end{aligned}$$
+        </p>
+      </li>
+    </ol>
+    <p><strong>The inverse interpolation method</strong> arrows as to 
+      obtain the same result to above without interpolating $X_k$ into 
+      a dense $k$ grid. In this method, we map the integration weight
+      on a dense $k$ grid into that on a coarse $k$ grid (inverse interpolation).
+      Therefore, if we require </p>
+        <p>
+          $$\begin{aligned}
+          \sum_k^{\rm dense} X_k^{\rm dense} w_k^{\rm dense}
+          =
+          \sum_k^{\rm coarse} X_k^{\rm coarse} w_k^{\rm coarse},
+          \end{aligned}$$
+        </p>
+    <p>we obtain</p>
+    <p>
+      $$\begin{aligned}
+      w_k^{\rm coarse} = \sum_k^{\rm dense} F_{k ' k} w_{k'}^{\rm dense}.
+      \end{aligned}$$
+    </p>
+    <p>The numerical procedure for this method is as follows: </p>
+    <ol>
+      <li><p>Calculate the integration weight on a dense $k$ grid $w_k^{\rm dense}$
+          from $\varepsilon_k$ on a dense $k$ grid.</p></li>
+      <li><p>Obtain the integration weight on acoarse $k$ grid $w_k^{\rm coarse}$
+          by using the inverse interpolation method.</p></li>
+      <li><p>Evaluate that integration in a coarse $k$ grid
+          where $X_k$ was calculated.</p></li>
+    </ol>
+    <p>All routines in <code>libtetrabz</code> can parforme
+      the inverse interpolation method;
+      if we make $k$ grids for the orbital energy (<code>nge</code>)
+      and the integration weight (<code>ngw</code>) different, 
+      we obtain $w_k^{\rm coarse}$ calculated by using the inverse interpolation method.</p>
+
+    <p><a name="cite">
+        [1] M. Kawamura, Y. Gohda, S. Tsuneyuki, Phys. Rev. B 
+        <span><strong>89</strong></span> 094515 (2014).
+    </a></p>
+
+  </body>
+</html>

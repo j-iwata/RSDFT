@@ -52,7 +52,7 @@ CONTAINS
 
     call read_fermi(myrank,unit)
 
-    call read_io(myrank,unit)
+    call read_io
 
     call read_watch(myrank,unit)
 

@@ -28,6 +28,7 @@ MODS1 = \
        aa_module.o\
        symmetry_module.o\
        bz_module.o\
+       eigenvalues_module.o\
        ewald_variables.o\
        bcast_module.o\
        hartree_variables.o\
@@ -87,6 +88,7 @@ MODS1 = \
        bcset_0_module.o\
        ps_nloc2_init_module.o\
        eion_mol_module.o\
+       efield_module.o\
        ps_local_gth_module.o\
        psv_initrho_module.o\
        ps_nloc_mol_gth_module.o\

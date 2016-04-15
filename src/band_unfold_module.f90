@@ -7,6 +7,7 @@ MODULE band_unfold_module
   use parallel_module
   use wf_module, only: unk, esp
   use fft_module
+  use rsdft_mpi_module
 
   implicit none
 
@@ -166,7 +167,7 @@ CONTAINS
 
     pi2 = 2.0d0*acos(-1.0d0)
 
-    allocate( kbb_0(3,nktrj_0) ) ; kbb_0=0.0d0
+    allocate( kbb_0(3,nktrj_0)   ) ; kbb_0=0.0d0
     allocate( kxyz_0(3,nktrj_0)  ) ; kxyz_0=0.0d0
 
     do iktrj=1,nktrj_0
@@ -285,7 +286,8 @@ CONTAINS
     logical,intent(IN) :: disp_switch
     complex(8),allocatable :: zwork0(:,:,:),zwork1(:,:,:)
     integer :: ML,ML1,ML2,ML3,MSP_0,MSP_1,MBZ_0,MBZ_1,MB_0,MB_1,ML_0,ML_1
-    integer :: s,k,n,i,i1,i2,i3,ierr,LG_sc(3),iktrj
+    integer :: MB,MS,s,k,n,i,i1,i2,i3,ierr,LG_sc(3),iktrj
+    integer,allocatable :: iktrj_2_k(:)
     real(8) :: vtmp(3),utmp(3),pi2,sum0
 
     if ( .not.iswitch_banduf ) return
@@ -301,10 +303,12 @@ CONTAINS
     ML_1  = id_grid(myrank_g) + ir_grid(myrank_g)
     MB_0  = id_band(myrank_b) + 1
     MB_1  = id_band(myrank_b) + ir_band(myrank_b)
+    MB    = sum(ir_band)
     MBZ_0 = id_bzsm(myrank_k) + 1
     MBZ_1 = id_bzsm(myrank_k) + ir_bzsm(myrank_k)
     MSP_0 = id_spin(myrank_s) + 1
     MSP_1 = id_spin(myrank_s) + ir_spin(myrank_s)
+    MS    = sum(ir_spin)
 
     call init_fft
 
@@ -314,6 +318,9 @@ CONTAINS
 
     allocate( zwork0(0:ML1-1,0:ML2-1,0:ML3-1) ) ; zwork0=(0.0d0,0.0d0)
     allocate( zwork1(0:ML1-1,0:ML2-1,0:ML3-1) ) ; zwork1=(0.0d0,0.0d0)
+    allocate( iktrj_2_k(nktrj_0)              ) ; iktrj_2_k=0
+
+    weight_uf(:,:,:)=0.0d0
 
     do iktrj=1,nktrj_0
 
@@ -328,6 +335,8 @@ CONTAINS
        LG_sc(:) = nint( utmp(:) )
 
 ! ---
+
+       iktrj_2_k(iktrj)=MBZ_0
 
        do s=MSP_0,MSP_1
        do k=MBZ_0,MBZ_0
@@ -363,27 +372,38 @@ CONTAINS
        end do ! k
        end do ! s
 
+    end do ! iktrj
+
+! ---
+
+    call rsdft_allreduce_sum( weight_uf, comm_spin )
+    call rsdft_allreduce_sum( weight_uf, comm_bzsm )
+    call rsdft_allreduce_sum( weight_uf, comm_band )
+    call rsdft_allreduce_sum( iktrj_2_k, comm_bzsm )
+
 ! --- write unfolding data ---
+
+    do iktrj=1,nktrj_0
+
+       k = iktrj_2_k(iktrj)
+       if ( k == 0 ) cycle
 
        if ( myrank == 0 ) then
           write(unit_uf,'(1x,"iktrj=",i6,2x,2(3f10.6,2x))') &
                iktrj,kxyz_pc(1:3,iktrj),kxyz_0(1:3,iktrj)
-          do s=MSP_0,MSP_1
-          do k=MBZ_0,MBZ_0
-          do n=MB_0 ,MB_1
-             write(unit_uf,'(1x,2i6,f20.15,2x,g20.10)') &
-                  n,s,esp(n,k,s),weight_uf(iktrj,n,s)
-          end do
-          end do
+          do n=1,MB
+             write(unit_uf,'(1x,2i6,2(f20.15,2x,g20.10,2x))') &
+                  k,n,( esp(n,k,s),weight_uf(iktrj,n,s),s=1,MS )
           end do
        end if
 
-! ---
-
     end do ! iktrj
 
-    deallocate( zwork1 )
-    deallocate( zwork0 )
+! ---
+
+    deallocate( iktrj_2_k )
+    deallocate( zwork1    )
+    deallocate( zwork0    )
 
     call finalize_fft
 

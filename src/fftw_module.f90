@@ -2,6 +2,7 @@ MODULE fftw_module
 
   use,intrinsic :: iso_c_binding
   use grid_module, only: grid, get_range_rgrid
+  use rsdft_mpi_module, only: rsdft_allgatherv
 
   implicit none
 
@@ -12,6 +13,8 @@ MODULE fftw_module
   PUBLIC :: ML1_c, ML2_c, N_ML3_c, ML3_c0
   PUBLIC :: zwork3_ptr0, zwork3_ptr1
   PUBLIC :: z3_to_d1_fftw, z3_to_z1_fftw
+  PUBLIC :: forward_fftw
+  PUBLIC :: backward_fftw
 
   integer :: comm_fftw
   type(c_ptr) :: plan_forward,plan_backward
@@ -19,6 +22,8 @@ MODULE fftw_module
   integer(c_intptr_t) :: ML1_c,ML2_c,ML3_c,ML3_c0,N_ML3_c
   complex(c_double_complex), pointer :: zwork3_ptr0(:,:,:)=>null()
   complex(c_double_complex), pointer :: zwork3_ptr1(:,:,:)=>null()
+
+  integer,allocatable :: ir(:),id(:)
 
 CONTAINS
 
@@ -28,10 +33,11 @@ CONTAINS
     implicit none
     integer,intent(IN) :: Ngrid(3),Np(3),comm_grid, myrank_g
 #ifdef _FFTW_
-    integer :: ML1,Ml2,ML3,np1,np2,np3
+    integer :: ML1,Ml2,ML3,np1,np2,np3,n,m
     integer :: i1,i2,i3,irank,icolor,ierr
     integer(c_intptr_t) :: alloc_ML3_c
     include "fftw3-mpi.f03"
+    include "mpif.h"
 
     call write_border( 0, " init_fftw(start)" )
 
@@ -78,6 +84,18 @@ CONTAINS
 
     plan_backward = fftw_mpi_plan_dft_3d( ML3_c,ML2_c,ML1_c &
          ,zwork3_ptr0,zwork3_ptr1,comm_fftw,fftw_backward,fftw_measure )
+
+    call mpi_comm_size( comm_fftw, n, ierr )
+    call mpi_comm_rank( comm_fftw, m, ierr )
+    allocate( ir(0:n-1) ) ; ir=0
+    allocate( id(0:n-1) ) ; id=0
+!    m=ML1*ML2
+!    call mpi_allgather(m*N_ML3_c,1,MPI_INTEGER,ir,1,MPI_INTEGER,comm_fftw,ierr)
+!    call mpi_allgather(m*ML3_c0 ,1,MPI_INTEGER,id,1,MPI_INTEGER,comm_fftw,ierr)
+    ir(m) = ML1*ML2*N_ML3_c
+    id(m) = ML1*ML2*ML3_c0
+    call mpi_allgather(ir(m),1,MPI_INTEGER,ir,1,MPI_INTEGER,comm_fftw,ierr)
+    call mpi_allgather(id(m),1,MPI_INTEGER,id,1,MPI_INTEGER,comm_fftw,ierr)
 
     call write_border( 0, " init_fftw(end)" )
 #endif
@@ -134,6 +152,52 @@ CONTAINS
     end do
     end do
   END SUBROUTINE z3_to_z1_fftw
+
+
+  SUBROUTINE forward_fftw( z3 )
+    implicit none
+    complex(8),intent(INOUT) :: z3(:,:,:)
+    integer :: i1,i2,i3,j3
+    real(8) :: const
+#ifdef _FFTW_
+    include "fftw3-mpi.f03"
+    do i3=1,N_ML3_c
+       j3=i3+ML3_c0
+       do i2=1,ML2_c
+       do i1=1,ML1_c
+          zwork3_ptr0(i1,i2,i3) = z3(i1,i2,j3)
+       end do
+       end do
+    end do
+    call fftw_mpi_execute_dft( plan_forward, zwork3_ptr0, zwork3_ptr1 )
+    call rsdft_allgatherv( zwork3_ptr1, z3, ir, id, comm_fftw )
+    const=1.0d0/size(z3)
+    z3(:,:,:)=const*z3(:,:,:)
+#endif
+  END SUBROUTINE forward_fftw
+
+
+  SUBROUTINE backward_fftw( z3 )
+    implicit none
+    complex(8),intent(INOUT) :: z3(:,:,:)
+    integer :: i1,i2,i3,j3
+    real(8) :: const
+#ifdef _FFTW_
+    include "fftw3-mpi.f03"
+    do i3=1,N_ML3_c
+       j3=i3+ML3_c0
+       do i2=1,ML2_c
+       do i1=1,ML1_c
+          zwork3_ptr0(i1,i2,i3) = z3(i1,i2,j3)
+       end do
+       end do
+    end do
+    call fftw_mpi_execute_dft( plan_backward, zwork3_ptr0, zwork3_ptr1 )
+    call rsdft_allgatherv( zwork3_ptr1, z3, ir, id, comm_fftw )
+    const=1.0d0/size(z3)
+    z3(:,:,:)=const*z3(:,:,:)
+#endif
+  END SUBROUTINE backward_fftw
 
 
 END MODULE fftw_module

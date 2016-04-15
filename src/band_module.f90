@@ -28,6 +28,7 @@ MODULE band_module
   use fock_fft_module, only: init_fock_fft
   use band_unfold_module
   use hsort_module
+  use fermi_module, only: efermi
   
   implicit none
 
@@ -36,6 +37,8 @@ MODULE band_module
   PUBLIC :: read_band
 
   integer :: unit = 1
+
+  character(64),parameter :: version="version2.0"
 
 CONTAINS
 
@@ -155,6 +158,9 @@ CONTAINS
     if ( myrank == 0 ) then
        open(unit_band_eigv,file="band_eigv")
        open(unit_band_dedk,file="band_dedk")
+       write(unit_band_eigv,*) version
+       write(unit_band_eigv,'(1x,"Fermi_energy(hartree):",f20.15)') efermi
+       write(unit_band_eigv,'(1x,"Reciprocal_Lattice_Vectors:")')
        write(unit_band_eigv,'(1x,3f20.15)') bb(1:3,1)
        write(unit_band_eigv,'(1x,3f20.15)') bb(1:3,2)
        write(unit_band_eigv,'(1x,3f20.15)') bb(1:3,3)
@@ -174,12 +180,16 @@ CONTAINS
 
     loop_iktrj : do iktrj = iktrj_0, iktrj_2
 
-       if ( iktrj <= nskip_band ) then
-          if ( DISP_SWITCH_PARALLEL ) write(*,*) "Band ",iktrj," is skipped"
+       iktrj_00 = id_k(0) + 1 + iktrj - iktrj_0
+
+       if ( iktrj_00 <= nskip_band ) then
+          if ( DISP_SWITCH_PARALLEL ) then
+             do i=0,np_bzsm-1
+                write(*,*) "Band ",iktrj_00-id_k(0)+id_k(i)," is skipped"
+             end do
+          end if
           cycle
        end if
-
-       iktrj_00 = id_k(0) + iktrj - iktrj_0 + 1
 
        if ( iktrj <= nktrj ) then
           kbb(1:3,MBZ_0) = ktrj(1:3,iktrj)

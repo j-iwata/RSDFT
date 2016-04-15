@@ -1,0 +1,5 @@
+1) Edit TOPDIR and compile command and options in 'make.sys' 
+2) make
+3) DOS plot utility for RSDFT is rsdft_utility/dos2gp
+  ( see also examples/Si2_band_and_dos/dos_calc_step_by_step/ )
+

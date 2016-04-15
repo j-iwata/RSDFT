@@ -3,12 +3,13 @@ PROGRAM ufld2gp
   implicit none
   integer,parameter :: u1=1, u2=10, u3=11
   integer,parameter :: maxloop=1000000
-  integer :: loop,ik,k,n,i,j,nk,nk0,nb,ne,kmax
+  integer :: loop,ik,k,n,i,j,s,nk,nk0,nb,ns,ne,kmax
   character(5) :: cbuf
+  character(128) :: cbuf_long
   real(8),parameter :: aB=0.529177d0, HT=27.2116d0
   real(8),allocatable :: kxyz_pc(:,:),kxyz_sc(:,:)
-  real(8),allocatable :: esp(:,:), weight(:,:)
-  real(8) :: emax,emin,e_mergin,eta,de,pi,f,e,x
+  real(8),allocatable :: esp(:,:,:), weight(:,:,:)
+  real(8) :: emax,emin,e_mergin,eta,de,pi,f(2),e,x,dummy(4)
 
 ! ---
 
@@ -28,13 +29,14 @@ PROGRAM ufld2gp
 
   open(u1,file="band_ufld",status="old")
 
+  ns=0
   nb=0
   nk=0
   kmax=0
   do loop=1,maxloop
      read(u1,*,END=1) cbuf,k
-     kmax=max(k,kmax)
      if ( cbuf == "iktrj" ) then
+        kmax=max(k,kmax)
         nk=nk+1
         nb=0
      else
@@ -43,7 +45,15 @@ PROGRAM ufld2gp
   end do
 1 continue
 
-  write(*,*) "nk, nb=",nk,nb
+  rewind u1
+  read(u1,*)
+  read(u1,'(a)') cbuf_long
+  read(cbuf_long,*,END=2) i,j,dummy
+  ns=2
+2 continue
+  if ( ns == 0 ) ns=1
+
+  write(*,*) "ns, nk, nb=",ns,nk,nb
   write(*,*) "kmax=",kmax
 
   nk0=nk
@@ -51,10 +61,10 @@ PROGRAM ufld2gp
 
 ! ---
 
-  allocate( kxyz_pc(3,0:nk) ) ; kxyz_pc=0.0d0
-  allocate( kxyz_sc(3,nk) ) ; kxyz_sc=0.0d0
-  allocate( esp(nb,nk)    ) ; esp=0.0d0
-  allocate( weight(nb,nk) ) ; weight=0.0d0
+  allocate( kxyz_pc(3,0:nk)  ) ; kxyz_pc=0.0d0
+  allocate( kxyz_sc(3,nk)    ) ; kxyz_sc=0.0d0
+  allocate( esp(nb,nk,ns)    ) ; esp=0.0d0
+  allocate( weight(nb,nk,ns) ) ; weight=0.0d0
 
 ! ---
 
@@ -66,7 +76,7 @@ PROGRAM ufld2gp
 
      do n=1,nb
 
-        read(u1,*) i,j,esp(n,k),weight(n,k)
+        read(u1,*) i,j,(esp(n,k,s),weight(n,k,s),s=1,ns)
 
      end do
 
@@ -108,14 +118,16 @@ PROGRAM ufld2gp
 
         e = emin + (i-1)*de
 
-        f=0.0d0
-        do n=1,nb
-           f = f + eta/( (e-esp(n,k))**2 + eta**2 )*weight(n,k)
+        do s=1,ns
+           f(s)=0.0d0
+           do n=1,nb
+              f(s) = f(s) + eta/( (e-esp(n,k,s))**2 + eta**2 )*weight(n,k,s)
+           end do
+           f(s)=f(s)/pi
         end do
-        f=f/pi
 
-        write(u2,'(1x,3f20.15)') x,e*HT,f
-        write(u3,'(1x,3f20.15)') x,e*HT,log(f)
+        write(u2,'(1x,4f20.15)') x,e*HT,(f(s),s=1,ns)
+        write(u3,'(1x,4f20.15)') x,e*HT,(log(f(s)),s=1,ns)
 
      end do ! i
 

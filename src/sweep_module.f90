@@ -16,6 +16,7 @@ MODULE sweep_module
   use hamiltonian_module
   use xc_hybrid_module, only: control_xc_hybrid, get_flag_xc_hybrid
   use io_tools_module
+  use eigenvalues_module
 
   implicit none
 
@@ -68,6 +69,7 @@ CONTAINS
     character(40) :: chr_iter
     character(22) :: add_info
     type(time) :: etime
+    type(eigv) :: eval
     logical,external :: exit_program
 
     Diter = 0
@@ -176,6 +178,8 @@ CONTAINS
        flag_exit = (flag_end.or.flag_conv.or.(iter==Diter))
 
        if ( disp_switch ) call write_info_sweep
+       call construct_eigenvalues( Nband, Nbzsm, Nspin, esp, eval )
+       if ( myrank == 0 ) call write_eigenvalues( eval )
 
        call calc_time_watch( etime )
        if ( disp_switch ) then

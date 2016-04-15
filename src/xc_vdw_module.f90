@@ -10,6 +10,7 @@ MODULE xc_vdw_module
   use lattice_module, only: lattice,get_aa_lattice,get_reciprocal_lattice
   use basic_type_factory
   use fft_module
+  use polint_module
 
   implicit none
 
@@ -30,6 +31,10 @@ MODULE xc_vdw_module
 
   real(8),allocatable :: phiG(:,:,:)
   real(8),allocatable :: bmat(:,:),cmat(:,:),dmat(:,:)
+
+  integer :: NG_table=1000
+  real(8) :: Gmax_table=50.0d0
+  real(8),allocatable :: phiG_table(:,:,:)
 
   real(8),parameter :: zero_density = 1.d-10
   logical :: flag_init=.false.
@@ -60,7 +65,11 @@ CONTAINS
     allocate( phiG(NMGL,0:NumQgrid,0:NumQgrid) )
     phiG=0.0d0
 
-    call read_file_phiG( file_exist )
+    allocate( phiG_table(NG_table,0:NumQgrid,0:NumQgrid) )
+    phiG_table=0.0d0
+
+   !call read_file_phiG( file_exist, phiG )
+    call read_file_phiG( file_exist, phiG_table )
 
     if ( .not.file_exist ) then
 
@@ -72,19 +81,27 @@ CONTAINS
           n = n + 1
           if ( np-1 < myrank .or. mod(n-1,nprocs) /= myrank ) cycle
 
-          call calc_phiG( Qgrid(i), Qgrid(j), phiG(1,i,j) )
-
-          if ( i /= j ) phiG(:,j,i) = phiG(:,i,j)
+         !call calc_phiG( Qgrid(i), Qgrid(j), phiG(:,i,j) )
+         !if ( i /= j ) phiG(:,j,i) = phiG(:,i,j)
+          call calc_phiG_table( Qgrid(i), Qgrid(j), phiG_table(:,i,j) )
+          if ( i /= j ) phiG_table(:,j,i) = phiG_table(:,i,j)
 
        end do ! i
        end do ! j
 
-       call MPI_ALLREDUCE( MPI_IN_PLACE, phiG, size(phiG), MPI_REAL8 &
-            ,MPI_SUM, MPI_COMM_WORLD, info )
+      !call MPI_ALLREDUCE( MPI_IN_PLACE, phiG, size(phiG), MPI_REAL8 &
+      !                   ,MPI_SUM, MPI_COMM_WORLD, info )
+       call MPI_ALLREDUCE( MPI_IN_PLACE, phiG_table, size(phiG_table) &
+                          ,MPI_REAL8, MPI_SUM, MPI_COMM_WORLD, info )
 
-       call write_file_phiG
+      !call write_file_phiG( phiG )
+       call write_file_phiG( phiG_table )
 
     end if
+
+    call make_phiG_by_interpolation( phiG_table, phiG )
+
+    deallocate( phiG_table )
 
     call init1_xc_vdw ! coefficients of 3rd spline
 
@@ -94,9 +111,10 @@ CONTAINS
 
   END SUBROUTINE init_xc_vdw
 
-  SUBROUTINE read_file_phiG( flag )
+  SUBROUTINE read_file_phiG( flag, phiGread )
     implicit none
     logical,intent(OUT) :: flag
+    real(8),intent(INOUT) :: phiGread(:,0:,0:)
     integer :: i,j,k,m,n
     flag=.false.
     if ( myrank == 0 ) then
@@ -104,14 +122,14 @@ CONTAINS
        if ( flag ) then
           open(unit_phig,file="xc_vdw_phig.dat",status="old")
           read(unit_phig,*) m,n
-          if ( m == NMGL .and. n == NumQgrid ) then
+          if ( m == size(phiGread,1) .and. n == NumQgrid ) then
              write(*,*) "phiG is read from 'xc_vdw_phig.dat'"
              do k=1,n
              do j=k,n
                 do i=1,m
-                   read(unit_phig,*) phiG(i,j,k)
+                   read(unit_phig,*) phiGread(i,j,k)
                 end do
-                if ( j /= k ) phiG(:,k,j)=phiG(:,j,k)
+                if ( j /= k ) phiGread(:,k,j)=phiGread(:,j,k)
              end do ! j
              end do ! k
           else
@@ -122,28 +140,92 @@ CONTAINS
     end if
     call MPI_BCAST( flag, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, i )
     if ( flag ) then
-       call MPI_ALLREDUCE( MPI_IN_PLACE, phiG, size(phiG), MPI_REAL8 &
-            ,MPI_SUM, MPI_COMM_WORLD, i )
+       call MPI_ALLREDUCE( MPI_IN_PLACE, phiGread, size(phiGread) &
+                          ,MPI_REAL8, MPI_SUM, MPI_COMM_WORLD, i )
     end if
   END SUBROUTINE read_file_phiG
 
-  SUBROUTINE write_file_phiG
+  SUBROUTINE write_file_phiG( phiGout )
     implicit none
+    real(8),intent(IN) :: phiGout(:,0:,0:)
     integer :: i,j,k
     if ( myrank == 0 ) then
        write(*,*) "phiG is written to 'xc_vdw_phig.dat'"
        open(unit_phig,file="xc_vdw_phig.dat")
-       write(unit_phig,*) NMGL, NumQgrid
+       write(unit_phig,*) size(phiGout,1), NumQgrid
        do k=1,NumQgrid
        do j=k,NumQgrid
-          do i=1,NMGL
-             write(unit_phig,*) phiG(i,j,k)
+          do i=1,size(phiGout,1)
+             write(unit_phig,*) phiGout(i,j,k)
           end do
        end do ! j
        end do ! k
        close(unit_phig)
     end if
   END SUBROUTINE write_file_phiG
+
+  SUBROUTINE calc_phiG_table( qi, qj, phiGtab )
+    implicit none
+    real(8),intent(IN)  :: qi,qj
+    real(8),intent(OUT) :: phiGtab(:)
+    integer :: nr,i
+    real(8) :: rmax,dr,r,dG,G
+    real(8),allocatable :: phi(:)
+
+    phiGtab = 0.0d0
+
+    rmax = Dmax/max( qi, qj )
+    nr   = 400
+    dr   = rmax/nr
+    dG   = Gmax_table/NG_table
+
+    allocate( phi(0:nr) ) ; phi=0.0d0
+
+    do i=1,nr
+       r = i*dr
+       call calc_phi_b( qi*r, qj*r, phi(i) )
+    end do ! i
+
+    do i=1,NG_table
+       G=(i-1)*dG
+       call calc_phiG_sub( nr, dr, phi(1), G, phiGtab(i) )
+    end do
+
+    deallocate( phi )
+
+  END SUBROUTINE calc_phiG_table
+
+  SUBROUTINE calc_phiG_sub( nr, dr, phi, G, phiG )
+    implicit none
+    integer,intent(IN) :: nr
+    real(8),intent(IN) :: dr, phi(nr), G
+    real(8),intent(OUT) :: phiG
+    integer :: i,ig
+    real(8) :: r,sum0,pi4
+
+    pi4 = 4.0d0*acos(-1.0d0)
+
+    if ( G <= 1.d-9 ) then
+
+       sum0=0.0d0
+       do i=1,nr
+          r = i*dr
+          sum0 = sum0 + r*r*phi(i)
+       end do
+       phiG=pi4*sum0*dr
+
+    else
+
+       sum0=0.0d0
+       do i=1,nr
+          r = i*dr
+          sum0 = sum0 + r*phi(i)*sin(G*r)
+       end do
+       phiG=pi4/G*sum0*dr
+
+    end if
+
+  END SUBROUTINE calc_phiG_sub
 
   SUBROUTINE calc_phiG( qi, qj, phiG )
     implicit none
@@ -216,6 +298,57 @@ CONTAINS
     end do ! ig
 
   END SUBROUTINE check_phiG
+
+  SUBROUTINE make_phiG_by_interpolation( phiGtab, phiGout )
+    implicit none
+    real(8),intent(IN)  :: phiGtab(:,0:,0:)
+    real(8),intent(OUT) :: phiGout(:,0:,0:)
+    integer :: ig,i,i0,i1,m,j,k
+    real(8) :: G,dG,f,f0,err,err0
+    real(8),allocatable :: Gtab(:)
+    real(8),parameter :: tol=1.d-10
+
+    dG = Gmax_table/NG_table
+
+    allocate( Gtab(NG_table) ) ; Gtab=0.0d0
+    do i=1,NG_table
+       Gtab(i) = (i-1)*dG
+    end do
+
+    do ig=1,NMGL
+
+       G=sqrt( GG(ig) )
+
+       if ( G < 1.d-9 ) then
+          phiGout(ig,:,:) = phiGtab(1,:,:)
+       else if ( G > Gmax_table ) then
+          phiGout(ig,:,:) = phiGtab(NG_table,:,:)
+       else
+          i=nint(G/dG)
+          do k=1,NumQgrid
+          do j=k,NumQgrid
+             err0=1.d10
+             do m=1,20
+                i0=max(i-m,1)
+                i1=min(i+m,NG_table)
+                call polint(Gtab(i0:i1),phiGtab(i0:i1,j,k),i1-i0+1,G,f,err)
+                if ( abs(err) < err0 ) then
+                   f0=f
+                   err0=abs(err)
+                   if ( err0 < tol ) exit
+                end if
+             end do ! m
+             phiG(ig,j,k)=f0
+             if ( j /= k ) phiG(ig,k,j)=f0
+          end do ! j
+          end do ! k
+       end if
+
+    end do ! ig
+
+    deallocate( Gtab )
+
+  END SUBROUTINE make_phiG_by_interpolation
 
   SUBROUTINE calc_phi_b( di, dj, phi )
     implicit none
