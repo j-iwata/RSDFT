@@ -1,0 +1,13 @@
+@import url("theme.css");
+
+.wy-nav-content {
+    max-width: none;
+}
+
+span.eqno {
+    float: right;
+}
+span.eqno a.headerlink {
+    position: relative;
+    z-index: 1;
+}

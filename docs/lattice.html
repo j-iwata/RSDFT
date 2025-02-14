@@ -1,0 +1,218 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1. 格子ベクトルと逆格子ベクトル</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/my_theme.css?v=5dafae25" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=c033477b"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/translations.js?v=4755f45a"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="genindex.html" />
+    <link rel="search" title="検索" href="search.html" />
+    <link rel="next" title="2. 格子座標" href="coordinates.html" />
+    <link rel="prev" title="Technical Notes" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Technical Notes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">1. 格子ベクトルと逆格子ベクトル</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">1.1. 定義と性質</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">1.2. 格子ベクトルの独立な成分</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="coordinates.html">2. 格子座標</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Technical Notes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active"><span class="section-number">1. </span>格子ベクトルと逆格子ベクトル</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/lattice.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="lattice">
+<span id="id1"></span><h1><span class="section-number">1. </span>格子ベクトルと逆格子ベクトル<a class="headerlink" href="#lattice" title="Link to this heading"></a></h1>
+<section id="id2">
+<h2><span class="section-number">1.1. </span>定義と性質<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<p>結晶の周期性および単位胞（Unit cell）を定める３つのベクトル</p>
+<div class="math notranslate nohighlight" id="equation-avec">
+<span class="eqno">(1)<a class="headerlink" href="#equation-avec" title="Link to this equation"></a></span>\[\begin{split}\boldsymbol{a}_1 =
+\begin{pmatrix}
+a_{1}^x \\
+a_{1}^y \\
+a_{1}^z
+\end{pmatrix}
+, \quad
+\boldsymbol{a}_2 =
+\begin{pmatrix}
+a_{2}^x \\
+a_{2}^y \\
+a_{2}^z
+\end{pmatrix}
+, \quad
+\boldsymbol{a}_3 =
+\begin{pmatrix}
+a_{3}^x \\
+a_{3}^y \\
+a_{3}^z
+\end{pmatrix}\end{split}\]</div>
+<p>これを格子ベクトルと呼ぶ。格子ベクトルが実空間での周期性を表すのに対し、次で定義される逆格子ベクトル</p>
+<div class="math notranslate nohighlight" id="equation-bvec">
+<span class="eqno">(2)<a class="headerlink" href="#equation-bvec" title="Link to this equation"></a></span>\[\boldsymbol{b}_1 = 2\pi\frac{\boldsymbol{a}_2\times\boldsymbol{a}_3}
+{\boldsymbol{a}_1\cdot \left(\boldsymbol{a}_2\times\boldsymbol{a}_3\right)}
+, \quad
+\boldsymbol{b}_2 = 2\pi\frac{\boldsymbol{a}_3\times\boldsymbol{a}_1}
+{\boldsymbol{a}_1\cdot \left(\boldsymbol{a}_2\times\boldsymbol{a}_3\right)}
+, \quad
+\boldsymbol{b}_3 = 2\pi\frac{\boldsymbol{a}_1\times\boldsymbol{a}_2}
+{\boldsymbol{a}_1\cdot \left(\boldsymbol{a}_2\times\boldsymbol{a}_3\right)}\]</div>
+<p>は、（フーリエ変換で移った先の）波数空間での周期性を表す。</p>
+<p>格子ベクトルと逆格子ベクトルは、次の直交関係を満たす。</p>
+<div class="math notranslate nohighlight" id="equation-ortho">
+<span class="eqno">(3)<a class="headerlink" href="#equation-ortho" title="Link to this equation"></a></span>\[\boldsymbol{a}_i \cdot \boldsymbol{b}_j = 2\pi\delta_{ij}\]</div>
+<p>いま、格子ベクトルと逆格子ベクトルの成分をそれぞれ並べ、以下のような行列を作ってみる
+（これはカルテシアン座標と<a class="reference internal" href="coordinates.html#coordinates"><span class="std std-ref">格子座標</span></a>の間の座標変換の行列となっている）。</p>
+<div class="math notranslate nohighlight" id="equation-abmat">
+<span class="eqno">(4)<a class="headerlink" href="#equation-abmat" title="Link to this equation"></a></span>\[\begin{split}A \equiv
+\begin{pmatrix}
+a_{1}^x &amp; a_{2}^x &amp; a_{3}^x \\
+a_{1}^y &amp; a_{2}^y &amp; a_{3}^y \\
+a_{1}^z &amp; a_{2}^z &amp; a_{3}^z \\
+\end{pmatrix}
+, \quad
+B \equiv
+\begin{pmatrix}
+b_{1}^x &amp; b_{2}^x &amp; b_{3}^x \\
+b_{1}^y &amp; b_{2}^y &amp; b_{3}^y \\
+b_{1}^z &amp; b_{2}^z &amp; b_{3}^z \\
+\end{pmatrix}\end{split}\]</div>
+<p>式 <a class="reference internal" href="#equation-ortho">(3)</a> の直交性から、行列の積として</p>
+<div class="math notranslate nohighlight" id="equation-abortho">
+<span class="eqno">(5)<a class="headerlink" href="#equation-abortho" title="Link to this equation"></a></span>\[\begin{split}A^\top B
+=
+\begin{pmatrix}
+a_{1}^x &amp; a_{1}^y &amp; a_{1}^z \\
+a_{2}^x &amp; a_{2}^y &amp; a_{2}^z \\
+a_{3}^x &amp; a_{3}^y &amp; a_{3}^z \\
+\end{pmatrix}
+\begin{pmatrix}
+b_{1}^x &amp; b_{2}^x &amp; b_{3}^x \\
+b_{1}^y &amp; b_{2}^y &amp; b_{3}^y \\
+b_{1}^z &amp; b_{2}^z &amp; b_{3}^z \\
+\end{pmatrix}
+= 2\pi I\end{split}\]</div>
+<p>となることがわかる。これから、<span class="math notranslate nohighlight">\(A, B\)</span> の逆行列は、互いの転置行列に一致することがわかる。</p>
+<div class="math notranslate nohighlight" id="equation-inverse">
+<span class="eqno">(6)<a class="headerlink" href="#equation-inverse" title="Link to this equation"></a></span>\[A^{-1} = \frac{1}{2\pi}B^\top
+, \quad
+B^{-1} = \frac{1}{2\pi}A^\top\]</div>
+</section>
+<section id="id3">
+<h2><span class="section-number">1.2. </span>格子ベクトルの独立な成分<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<p>式 <a class="reference internal" href="#equation-avec">(1)</a> は9つの成分を持っている。これは、何らかの計算を行ったりするときに必要となるが、
+たんに物理系を記述するという目的だけであれば、系全体の並進と回転の自由度を取り除いた6つの成分で十分である。
+例えば結晶構造データの国際的なフォーマットであるCIF（Crystallographic Information File）では</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">_cell_length_a</span>   <span class="mf">3.84928</span>
+<span class="n">_cell_length_b</span>   <span class="mf">3.84928</span>
+<span class="n">_cell_length_c</span>   <span class="mf">3.84928</span>
+<span class="n">_cell_angle_alpha</span>   <span class="mf">60.00000</span>
+<span class="n">_cell_angle_beta</span>    <span class="mf">60.00000</span>
+<span class="n">_cell_angle_gamma</span>   <span class="mf">60.00000</span>
+</pre></div>
+</div>
+<p>のように、格子ベクトルの長さと、それぞれのベクトルのなす角度、という情報だけが記録されている。式 <a class="reference internal" href="#equation-avec">(1)</a> との対応を明示すれば</p>
+<div class="math notranslate nohighlight">
+\[a = \|\boldsymbol{a}_1\|
+, \quad
+b = \|\boldsymbol{a}_2\|
+, \quad
+c = \|\boldsymbol{a}_3\|\]</div>
+<div class="math notranslate nohighlight" id="equation-len-and-ang">
+<span class="eqno">(7)<a class="headerlink" href="#equation-len-and-ang" title="Link to this equation"></a></span>\[\alpha = \arccos\left(\frac{\boldsymbol{a}_2\cdot\boldsymbol{a}_3}{\|\boldsymbol{a}_2\|\|\boldsymbol{a}_3\|}\right)
+, \quad
+\beta = \arccos\left(\frac{\boldsymbol{a}_3\cdot\boldsymbol{a}_1}{\|\boldsymbol{a}_3\|\|\boldsymbol{a}_1\|}\right)
+, \quad
+\gamma = \arccos\left(\frac{\boldsymbol{a}_1\cdot\boldsymbol{a}_2}{\|\boldsymbol{a}_1\|\|\boldsymbol{a}_2\|}\right)\]</div>
+<p>となる。</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Technical Notes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="coordinates.html" class="btn btn-neutral float-right" title="2. 格子座標" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Quemix inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
